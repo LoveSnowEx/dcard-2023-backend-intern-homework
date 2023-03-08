@@ -47,6 +47,9 @@ func Connect() (*DB, error) {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
 
+	// Enable extension for uuid
+	db.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";")
+
 	// Migrate the schema
 	db.AutoMigrate()
 
