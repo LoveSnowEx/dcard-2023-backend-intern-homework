@@ -1,0 +1,15 @@
+version: '3'
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - /var/lib/dcard-2023-backend-intern-homework/postgresql/data:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT}:5432"
+    env_file:
+      - .env
