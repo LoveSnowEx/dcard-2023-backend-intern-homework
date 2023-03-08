@@ -1,13 +1,32 @@
 package main
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"log"
+
+	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/db"
+	"github.com/gofiber/fiber/v2"
+)
 
 func main() {
-    app := fiber.New()
+	dbConn, err := db.Connect()
+	if err != nil {
+		log.Fatalf("failed to connect to database: %v", err)
+	}
 
-    app.Get("/", func(c *fiber.Ctx) error {
-        return c.SendString("Hello, World 👋!")
-    })
+	defer func() {
+		// Close the database connection when the program exits
+		if err := db.Close(); err != nil {
+			log.Fatalf("failed to close database connection: %v", err)
+		}
+	}()
 
-    app.Listen(":3000")
+	_ = dbConn
+
+	app := fiber.New()
+
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.SendString("Hello, World 👋!")
+	})
+
+	app.Listen(":3000")
 }
