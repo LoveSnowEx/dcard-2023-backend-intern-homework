@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package pagelist;
+option go_package =
+  "github.com/LoveSnowEx/dcard-2023-backend-intern-homework/proto/pb;pb";
+
+message Page {
+  uint32 id = 1;
+  string title = 2;
+  string content = 3;
+}
+
+message Empty {
+
+}
+
+message PageList {
+  string key = 1;
+}
+
+message PageIterator {
+  string key = 1;
+  uint32 page_id = 2;
+}
+
+message DeleteRequest {
+  string page_key = 1;
+}
+
+message BeginRequest {
+  string page_key = 1;
+}
+
+message EndRequest {
+  string page_key = 1;
+}
+
+message NextRequest {
+  string iter_key = 1;
+}
+
+message PrevRequest {
+  string iter_key = 1;
+}
+
+message InsertRequest {
+  string iter_key = 1;
+  uint32 page_id = 2;
+}
+
+message EraseRequest {
+  string iter_key = 1;
+}
+
+message SetRequest {
+  string iter_key = 1;
+  uint32 page_id = 2;
+}
+
+message PushRequest {
+  string list_key = 1;
+  uint32 page_id = 2;
+}
+
+message PopRequest {
+  string list_key = 1;
+}
+
+service PageListService {
+  rpc New(Empty) returns (PageList) {}
+  rpc Delete(DeleteRequest) returns (Empty) {}
+  rpc Begin(BeginRequest) returns (PageIterator) {}
+  rpc End(EndRequest) returns (PageIterator) {}
+  rpc Next(NextRequest) returns (PageIterator) {}
+  rpc Prev(PrevRequest) returns (PageIterator) {}
+  rpc Clear(PageList) returns (Empty) {}
+  rpc Insert(InsertRequest) returns (PageIterator) {}
+  rpc Erase(EraseRequest) returns (PageIterator) {}
+  rpc Set(SetRequest) returns (PageIterator) {}
+  rpc PushBack(PushRequest) returns (PageIterator) {}
+  rpc PopBack(PopRequest) returns (Empty) {}
+  rpc PushFront(PushRequest) returns (PageIterator) {}
+  rpc PopFront(PopRequest) returns (Empty) {}
+}
