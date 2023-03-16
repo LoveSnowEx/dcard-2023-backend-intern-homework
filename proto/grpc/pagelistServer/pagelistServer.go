@@ -1,4 +1,4 @@
-package main
+package pagelistServer
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type pageListServer struct {
+type Server struct {
 	pb.UnimplementedPageListServiceServer
 }
 
@@ -24,7 +24,7 @@ func init() {
 	dbConn = conn
 }
 
-func (s *pageListServer) New(context.Context, *pb.Empty) (*pb.PageList, error) {
+func (s *Server) New(context.Context, *pb.Empty) (*pb.PageList, error) {
 	pl := pagelist.New()
 	err := dbConn.CreatePageList(pl)
 	if err != nil {
@@ -33,7 +33,7 @@ func (s *pageListServer) New(context.Context, *pb.Empty) (*pb.PageList, error) {
 	return &pb.PageList{Key: pl.Key.String()}, nil
 }
 
-func (s *pageListServer) Delete(ctx context.Context, req *pb.DeleteRequest) (*pb.Empty, error) {
+func (s *Server) Delete(ctx context.Context, req *pb.DeleteRequest) (*pb.Empty, error) {
 	u, err := uuid.Parse(req.PageKey)
 	if err != nil {
 		return nil, fmt.Errorf("invalid key: %s", req.PageKey)
@@ -45,7 +45,7 @@ func (s *pageListServer) Delete(ctx context.Context, req *pb.DeleteRequest) (*pb
 	return &pb.Empty{}, nil
 }
 
-func (s *pageListServer) Begin(ctx context.Context, req *pb.BeginRequest) (*pb.PageIterator, error) {
+func (s *Server) Begin(ctx context.Context, req *pb.BeginRequest) (*pb.PageIterator, error) {
 	u, err := uuid.Parse(req.PageKey)
 	if err != nil {
 		return nil, fmt.Errorf("invalid key: %s", req.PageKey)
@@ -57,7 +57,7 @@ func (s *pageListServer) Begin(ctx context.Context, req *pb.BeginRequest) (*pb.P
 	return &pb.PageIterator{Key: end.NextKey.String()}, nil
 }
 
-func (s *pageListServer) End(ctx context.Context, req *pb.EndRequest) (*pb.PageIterator, error) {
+func (s *Server) End(ctx context.Context, req *pb.EndRequest) (*pb.PageIterator, error) {
 	u, err := uuid.Parse(req.PageKey)
 	if err != nil {
 		return nil, fmt.Errorf("invalid key: %s", req.PageKey)
@@ -69,7 +69,7 @@ func (s *pageListServer) End(ctx context.Context, req *pb.EndRequest) (*pb.PageI
 	return &pb.PageIterator{Key: end.Key.String()}, nil
 }
 
-func (s *pageListServer) Next(ctx context.Context, req *pb.NextRequest) (*pb.PageIterator, error) {
+func (s *Server) Next(ctx context.Context, req *pb.NextRequest) (*pb.PageIterator, error) {
 	u, err := uuid.Parse(req.IterKey)
 	if err != nil {
 		return nil, fmt.Errorf("invalid key: %s", req.IterKey)
@@ -81,7 +81,7 @@ func (s *pageListServer) Next(ctx context.Context, req *pb.NextRequest) (*pb.Pag
 	return &pb.PageIterator{Key: next.Key.String()}, nil
 }
 
-func (s *pageListServer) Prev(ctx context.Context, req *pb.PrevRequest) (*pb.PageIterator, error) {
+func (s *Server) Prev(ctx context.Context, req *pb.PrevRequest) (*pb.PageIterator, error) {
 	u, err := uuid.Parse(req.IterKey)
 	if err != nil {
 		return nil, fmt.Errorf("invalid key: %s", req.IterKey)
@@ -93,7 +93,7 @@ func (s *pageListServer) Prev(ctx context.Context, req *pb.PrevRequest) (*pb.Pag
 	return &pb.PageIterator{Key: prev.Key.String()}, nil
 }
 
-func (s *pageListServer) Clear(ctx context.Context, pl *pb.PageList) (*pb.Empty, error) {
+func (s *Server) Clear(ctx context.Context, pl *pb.PageList) (*pb.Empty, error) {
 	u, err := uuid.Parse(pl.Key)
 	if err != nil {
 		return nil, fmt.Errorf("invalid key: %s", pl.Key)
@@ -105,7 +105,7 @@ func (s *pageListServer) Clear(ctx context.Context, pl *pb.PageList) (*pb.Empty,
 	return &pb.Empty{}, err
 }
 
-func (s *pageListServer) Insert(ctx context.Context, req *pb.InsertRequest) (*pb.PageIterator, error) {
+func (s *Server) Insert(ctx context.Context, req *pb.InsertRequest) (*pb.PageIterator, error) {
 	u, err := uuid.Parse(req.IterKey)
 	if err != nil {
 		return nil, fmt.Errorf("invalid key: %s", req.IterKey)
@@ -117,7 +117,7 @@ func (s *pageListServer) Insert(ctx context.Context, req *pb.InsertRequest) (*pb
 	return &pb.PageIterator{Key: node.Key.String(), PageId: uint32(node.PageID)}, nil
 }
 
-func (s *pageListServer) Erase(ctx context.Context, req *pb.EraseRequest) (*pb.PageIterator, error) {
+func (s *Server) Erase(ctx context.Context, req *pb.EraseRequest) (*pb.PageIterator, error) {
 	u, err := uuid.Parse(req.IterKey)
 	if err != nil {
 		return nil, fmt.Errorf("invalid key: %s", req.IterKey)
@@ -129,7 +129,7 @@ func (s *pageListServer) Erase(ctx context.Context, req *pb.EraseRequest) (*pb.P
 	return &pb.PageIterator{Key: node.Key.String(), PageId: uint32(node.PageID)}, nil
 }
 
-func (s *pageListServer) Set(ctx context.Context, req *pb.SetRequest) (*pb.PageIterator, error) {
+func (s *Server) Set(ctx context.Context, req *pb.SetRequest) (*pb.PageIterator, error) {
 	u, err := uuid.Parse(req.IterKey)
 	if err != nil {
 		return nil, fmt.Errorf("invalid key: %s", req.IterKey)
@@ -141,7 +141,7 @@ func (s *pageListServer) Set(ctx context.Context, req *pb.SetRequest) (*pb.PageI
 	return &pb.PageIterator{Key: node.Key.String(), PageId: uint32(node.PageID)}, nil
 }
 
-func (s *pageListServer) PushBack(ctx context.Context, req *pb.PushRequest) (*pb.PageIterator, error) {
+func (s *Server) PushBack(ctx context.Context, req *pb.PushRequest) (*pb.PageIterator, error) {
 	u, err := uuid.Parse(req.ListKey)
 	if err != nil {
 		return nil, fmt.Errorf("invalid key: %s", req.ListKey)
@@ -153,7 +153,7 @@ func (s *pageListServer) PushBack(ctx context.Context, req *pb.PushRequest) (*pb
 	return &pb.PageIterator{Key: node.Key.String(), PageId: uint32(node.PageID)}, nil
 }
 
-func (s *pageListServer) PopBack(ctx context.Context, req *pb.PopRequest) (*pb.Empty, error) {
+func (s *Server) PopBack(ctx context.Context, req *pb.PopRequest) (*pb.Empty, error) {
 	u, err := uuid.Parse(req.ListKey)
 	if err != nil {
 		return nil, fmt.Errorf("invalid key: %s", req.ListKey)
@@ -165,7 +165,7 @@ func (s *pageListServer) PopBack(ctx context.Context, req *pb.PopRequest) (*pb.E
 	return &pb.Empty{}, nil
 }
 
-func (s *pageListServer) PushFront(ctx context.Context, req *pb.PushRequest) (*pb.PageIterator, error) {
+func (s *Server) PushFront(ctx context.Context, req *pb.PushRequest) (*pb.PageIterator, error) {
 	u, err := uuid.Parse(req.ListKey)
 	if err != nil {
 		return nil, fmt.Errorf("invalid key: %s", req.ListKey)
@@ -177,7 +177,7 @@ func (s *pageListServer) PushFront(ctx context.Context, req *pb.PushRequest) (*p
 	return &pb.PageIterator{Key: node.Key.String(), PageId: uint32(node.PageID)}, nil
 }
 
-func (s *pageListServer) PopFront(ctx context.Context, req *pb.PopRequest) (*pb.Empty, error) {
+func (s *Server) PopFront(ctx context.Context, req *pb.PopRequest) (*pb.Empty, error) {
 	u, err := uuid.Parse(req.ListKey)
 	if err != nil {
 		return nil, fmt.Errorf("invalid key: %s", req.ListKey)
