@@ -27,7 +27,7 @@ func (db *DB) CreatePageList(list *pl.PageList) error {
 // Retrieve a page list by key
 func (db *DB) GetPageListByKey(key uuid.UUID) (*pl.PageList, error) {
 	var list pl.PageList
-	err := db.DB.First(&list, "key = ?", key).Error
+	err := db.DB.First(&list, "\"key\" = ?", key).Error
 	if err != nil {
 		return nil, err
 	}
@@ -36,11 +36,11 @@ func (db *DB) GetPageListByKey(key uuid.UUID) (*pl.PageList, error) {
 
 // Delete a page list
 func (db *DB) DeletePageList(key uuid.UUID) error {
-	err := db.DB.Delete(&pl.PageNode{}, "list_key = ?", key).Error
+	err := db.DB.Delete(&pl.PageNode{}, "\"list_key\" = ?", key).Error
 	if err != nil {
 		return fmt.Errorf("delete page list: %v", err)
 	}
-	err = db.DB.Delete(&pl.PageList{}, "key = ?", key).Error
+	err = db.DB.Delete(&pl.PageList{}, "\"key\" = ?", key).Error
 	if err != nil {
 		return fmt.Errorf("delete page list: %v", err)
 	}
@@ -71,7 +71,7 @@ func (db *DB) ClonePageList(key uuid.UUID) (*pl.PageList, error) {
 // Retrieve a page node by key
 func (db *DB) GetPageNodeByKey(key uuid.UUID) (*pl.PageNode, error) {
 	var node pl.PageNode
-	err := db.DB.First(&node, "key = ?", key).Error
+	err := db.DB.First(&node, "\"key\" = ?", key).Error
 	if err != nil {
 		return nil, fmt.Errorf("get page node by key: %v", err)
 	}
@@ -81,7 +81,7 @@ func (db *DB) GetPageNodeByKey(key uuid.UUID) (*pl.PageNode, error) {
 // Retrieve page nodes by list key
 func (db *DB) GetPageNodesByListKey(key uuid.UUID) ([]pl.PageNode, error) {
 	var nodes []pl.PageNode
-	err := db.DB.Find(&nodes, "key = ?", key).Error
+	err := db.DB.Find(&nodes, "\"key\" = ?", key).Error
 	if err != nil {
 		return nil, fmt.Errorf("get page nodes by list key: %v", err)
 	}
@@ -120,7 +120,7 @@ func (db *DB) GetPageListEnd(key uuid.UUID) (*pl.PageNode, error) {
 		return nil, fmt.Errorf("get page list end: %v", err)
 	}
 	var end pl.PageNode
-	err = db.DB.Where("list_key = ? AND end = ?", l.Key, true).First(&end).Error
+	err = db.DB.Where("\"list_key\" = ? AND \"end\" = ?", l.Key, true).First(&end).Error
 	if err != nil {
 		return nil, fmt.Errorf("get page list end node: %v", err)
 	}
@@ -134,7 +134,7 @@ func (db *DB) GetPageListBegin(key uuid.UUID) (*pl.PageNode, error) {
 		return nil, fmt.Errorf("get page list begin: %v", err)
 	}
 	var begin pl.PageNode
-	err = db.DB.First(&begin, "key = ?", end.NextKey).Error
+	err = db.DB.First(&begin, "\"key\" = ?", end.NextKey).Error
 	if err != nil {
 		return nil, fmt.Errorf("get page list end node: %v", err)
 	}
@@ -148,7 +148,7 @@ func (db *DB) GetPageNodeNext(key uuid.UUID) (*pl.PageNode, error) {
 		return nil, fmt.Errorf("get page node next: %v", err)
 	}
 	var next pl.PageNode
-	err = db.DB.First(&next, "key = ?", node.NextKey).Error
+	err = db.DB.First(&next, "\"key\" = ?", node.NextKey).Error
 	if err != nil {
 		return nil, fmt.Errorf("get page node next: %v", err)
 	}
@@ -162,7 +162,7 @@ func (db *DB) GetPageNodePrev(key uuid.UUID) (*pl.PageNode, error) {
 		return nil, fmt.Errorf("get page node prev: %v", err)
 	}
 	var prev pl.PageNode
-	err = db.DB.First(&prev, "key = ?", node.PrevKey).Error
+	err = db.DB.First(&prev, "\"key\" = ?", node.PrevKey).Error
 	if err != nil {
 		return nil, fmt.Errorf("get page node prev: %v", err)
 	}
@@ -185,11 +185,11 @@ func (db *DB) InsertPageNode(key uuid.UUID, pageID uint) (*pl.PageNode, error) {
 	if err != nil {
 		return nil, fmt.Errorf("insert page: %v", err)
 	}
-	err = db.DB.Model(&pl.PageNode{}).Where("key = ?", pos.PrevKey).Update("next_key", node.Key).Error
+	err = db.DB.Model(&pl.PageNode{}).Where("\"key\" = ?", pos.PrevKey).Update("next_key", node.Key).Error
 	if err != nil {
 		return nil, fmt.Errorf("insert page: %v", err)
 	}
-	err = db.DB.Model(&pl.PageNode{}).Where("key = ?", pos.Key).Update("prev_key", node.Key).Error
+	err = db.DB.Model(&pl.PageNode{}).Where("\"key\" = ?", pos.Key).Update("prev_key", node.Key).Error
 	if err != nil {
 		return nil, fmt.Errorf("insert page: %v", err)
 	}
@@ -205,20 +205,20 @@ func (db *DB) ErasePageNode(key uuid.UUID) (*pl.PageNode, error) {
 	if pos.End {
 		return nil, fmt.Errorf("erase page node: cannot erase end node")
 	}
-	err = db.DB.Delete(&pl.PageNode{}, "key = ?", pos.Key).Error
+	err = db.DB.Delete(&pl.PageNode{}, "\"key\" = ?", pos.Key).Error
 	if err != nil {
 		return nil, fmt.Errorf("erase page node: %v", err)
 	}
-	err = db.DB.Model(&pl.PageNode{}).Where("key = ?", pos.PrevKey).Update("next_key", pos.NextKey).Error
+	err = db.DB.Model(&pl.PageNode{}).Where("\"key\" = ?", pos.PrevKey).Update("next_key", pos.NextKey).Error
 	if err != nil {
 		return nil, fmt.Errorf("erase page node: %v", err)
 	}
-	err = db.DB.Model(&pl.PageNode{}).Where("key = ?", pos.NextKey).Update("prev_key", pos.PrevKey).Error
+	err = db.DB.Model(&pl.PageNode{}).Where("\"key\" = ?", pos.NextKey).Update("prev_key", pos.PrevKey).Error
 	if err != nil {
 		return nil, fmt.Errorf("erase page node: %v", err)
 	}
 	var next pl.PageNode
-	err = db.DB.First(&next, "key = ?", pos.NextKey).Error
+	err = db.DB.First(&next, "\"key\" = ?", pos.NextKey).Error
 	if err != nil {
 		return nil, fmt.Errorf("erase page node: %v", err)
 	}
@@ -228,7 +228,7 @@ func (db *DB) ErasePageNode(key uuid.UUID) (*pl.PageNode, error) {
 // Set page node page id
 func (db *DB) SetPageNode(key uuid.UUID, pageID uint) (*pl.PageNode, error) {
 	var node pl.PageNode
-	err := db.DB.Model(&pl.PageNode{}).Where("key = ?", key).Update("page_id", pageID).First(&node).Error
+	err := db.DB.Model(&pl.PageNode{}).Where("\"key\" = ?", key).Update("page_id", pageID).First(&node).Error
 	if err != nil {
 		return nil, fmt.Errorf("set page node: %v", err)
 	}
