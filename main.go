@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	dbConn, err := db.Connect()
+	_, err := db.Connect()
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
 	}
@@ -20,8 +20,6 @@ func main() {
 			log.Fatalf("failed to close database connection: %v", err)
 		}
 	}()
-
-	_ = dbConn
 
 	app := fiber.New()
 
