@@ -2,10 +2,16 @@ package db
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"time"
 
 	"gorm.io/driver/postgres"
+	"gorm.io/gorm/logger"
 
 	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/config"
+	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/db/page"
+	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/db/pagelist"
 	"gorm.io/gorm"
 )
 
@@ -42,7 +48,16 @@ func Connect() (*DB, error) {
 	)
 
 	// Open connection
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: logger.New(
+			log.New(os.Stdout, "\n", log.LstdFlags),
+			logger.Config{
+				SlowThreshold: time.Second,
+				LogLevel:      logger.Info,
+				Colorful:      true,
+			},
+		),
+	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
@@ -51,7 +66,7 @@ func Connect() (*DB, error) {
 	db.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";")
 
 	// Migrate the schema
-	db.AutoMigrate()
+	db.AutoMigrate(page.Page{}, pagelist.PageNode{}, pagelist.PageList{})
 
 	return &DB{DB: db}, nil
 }
