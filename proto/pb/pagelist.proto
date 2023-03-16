@@ -24,15 +24,15 @@ message PageIterator {
 }
 
 message DeleteRequest {
-  string page_key = 1;
+  string list_key = 1;
 }
 
 message BeginRequest {
-  string page_key = 1;
+  string list_key = 1;
 }
 
 message EndRequest {
-  string page_key = 1;
+  string list_key = 1;
 }
 
 message NextRequest {

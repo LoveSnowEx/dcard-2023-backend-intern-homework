@@ -34,9 +34,9 @@ func (s *Server) New(context.Context, *pb.Empty) (*pb.PageList, error) {
 }
 
 func (s *Server) Delete(ctx context.Context, req *pb.DeleteRequest) (*pb.Empty, error) {
-	u, err := uuid.Parse(req.PageKey)
+	u, err := uuid.Parse(req.ListKey)
 	if err != nil {
-		return nil, fmt.Errorf("invalid key: %s", req.PageKey)
+		return nil, fmt.Errorf("invalid key: %s", req.ListKey)
 	}
 	err = dbConn.DeletePageList(u)
 	if err != nil {
@@ -46,9 +46,9 @@ func (s *Server) Delete(ctx context.Context, req *pb.DeleteRequest) (*pb.Empty, 
 }
 
 func (s *Server) Begin(ctx context.Context, req *pb.BeginRequest) (*pb.PageIterator, error) {
-	u, err := uuid.Parse(req.PageKey)
+	u, err := uuid.Parse(req.ListKey)
 	if err != nil {
-		return nil, fmt.Errorf("invalid key: %s", req.PageKey)
+		return nil, fmt.Errorf("invalid key: %s", req.ListKey)
 	}
 	end, err := dbConn.GetPageListEnd(u)
 	if err != nil {
@@ -58,9 +58,9 @@ func (s *Server) Begin(ctx context.Context, req *pb.BeginRequest) (*pb.PageItera
 }
 
 func (s *Server) End(ctx context.Context, req *pb.EndRequest) (*pb.PageIterator, error) {
-	u, err := uuid.Parse(req.PageKey)
+	u, err := uuid.Parse(req.ListKey)
 	if err != nil {
-		return nil, fmt.Errorf("invalid key: %s", req.PageKey)
+		return nil, fmt.Errorf("invalid key: %s", req.ListKey)
 	}
 	end, err := dbConn.GetPageListEnd(u)
 	if err != nil {
