@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/db"
+	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/db/page"
 	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/internal/router"
 	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/proto/grpc/pagelistServer"
 	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/proto/pb"
@@ -37,6 +38,26 @@ func runGprc(addr string) error {
 	return srv.Serve(lis)
 }
 
+func initExamplePages() {
+	count := 10
+	dbConn, err := db.Connect()
+	if err != nil {
+		log.Fatalf("failed to connect to database: %v", err)
+	}
+	for i := 1; i <= count; i++ {
+		page := page.Page{
+			Title:   fmt.Sprintf("Page %d", i),
+			Content: fmt.Sprintf("Content %d", i),
+			Slug:    fmt.Sprintf("page-%d", i),
+		}
+		page.ID = uint(i)
+		err = dbConn.UpdatePage(&page)
+		if err != nil {
+			log.Fatalf("failed to create page: %v", err)
+		}
+	}
+}
+
 func main() {
 	_, err := db.Connect()
 	if err != nil {
@@ -49,6 +70,8 @@ func main() {
 			log.Fatalf("failed to close database connection: %v", err)
 		}
 	}()
+
+	initExamplePages()
 
 	c := make(chan os.Signal, 1)
 	done := make(chan struct{}, 1)
