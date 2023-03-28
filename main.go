@@ -25,7 +25,7 @@ func runFiber(addr string) error {
 	return app.Listen(addr)
 }
 
-func runGprc(addr string) error {
+func runGrpc(addr string) error {
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
@@ -89,7 +89,7 @@ func main() {
 		done <- struct{}{}
 	}()
 	go func() {
-		log.Fatalln(runGprc(":50051"))
+		log.Fatalln(runGrpc(":50051"))
 		done <- struct{}{}
 	}()
 
