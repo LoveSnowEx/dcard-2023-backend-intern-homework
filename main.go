@@ -10,6 +10,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/config"
 	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/db"
 	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/db/page"
 	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/internal/router"
@@ -107,15 +108,15 @@ func main() {
 		done <- struct{}{}
 	}()
 	go func() {
-		log.Fatalln(runFiber(":3000"))
+		log.Fatalln(runFiber(":" + config.FiberPort))
 		done <- struct{}{}
 	}()
 	go func() {
-		log.Fatalln(runGrpc(":50051"))
+		log.Fatalln(runGrpc(":" + config.GrpcPort))
 		done <- struct{}{}
 	}()
 	go func() {
-		log.Fatalln(runGrpcui(":8080", ":50051"))
+		log.Fatalln(runGrpcui(":"+config.GrpcuiPort, ":"+config.GrpcPort))
 		done <- struct{}{}
 	}()
 

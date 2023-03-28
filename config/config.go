@@ -13,6 +13,9 @@ var (
 	DBUser     string
 	DBPassword string
 	DBName     string
+	FiberPort  string
+	GrpcPort   string
+	GrpcuiPort string
 )
 
 func init() {
@@ -28,4 +31,8 @@ func init() {
 	DBUser = viper.GetString("DB_USER")
 	DBPassword = viper.GetString("DB_PASSWORD")
 	DBName = viper.GetString("DB_NAME")
+
+	FiberPort = viper.GetString("FIBER_PORT")
+	GrpcPort = viper.GetString("GRPC_PORT")
+	GrpcuiPort = viper.GetString("GRPCUI_PORT")
 }
