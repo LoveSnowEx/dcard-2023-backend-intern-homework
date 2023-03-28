@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -13,8 +15,10 @@ import (
 	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/internal/router"
 	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/proto/grpc/pagelistServer"
 	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/proto/pb"
+	"github.com/fullstorydev/grpcui/standalone"
 	"github.com/gofiber/fiber/v2"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -36,6 +40,24 @@ func runGrpc(addr string) error {
 	pb.RegisterPageListServiceServer(srv, &pagelistServer.Server{})
 
 	return srv.Serve(lis)
+}
+
+func runGrpcui(addr, target string) error {
+	ctx := context.Background()
+	cc, err := grpc.DialContext(
+		ctx,
+		target,
+		grpc.WithBlock(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		return err
+	}
+	h, err := standalone.HandlerViaReflection(ctx, cc, target)
+	if err != nil {
+		return err
+	}
+	return http.ListenAndServe(addr, h)
 }
 
 func initExamplePages() {
@@ -90,6 +112,10 @@ func main() {
 	}()
 	go func() {
 		log.Fatalln(runGrpc(":50051"))
+		done <- struct{}{}
+	}()
+	go func() {
+		log.Fatalln(runGrpcui(":8080", ":50051"))
 		done <- struct{}{}
 	}()
 

@@ -3,6 +3,7 @@ module github.com/LoveSnowEx/dcard-2023-backend-intern-homework
 go 1.20
 
 require (
+	github.com/fullstorydev/grpcui v1.3.1
 	github.com/gofiber/fiber/v2 v2.42.0
 	github.com/google/uuid v1.3.0
 	github.com/spf13/viper v1.15.0
@@ -15,11 +16,13 @@ require (
 require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
+	github.com/fullstorydev/grpcurl v1.8.6 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/pgx/v5 v5.3.0 // indirect
+	github.com/jhump/protoreflect v1.12.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/klauspost/compress v1.16.0 // indirect
