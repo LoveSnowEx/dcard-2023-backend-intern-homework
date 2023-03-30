@@ -2,22 +2,13 @@ package handler
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/db"
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/google/uuid"
 )
-
-var dbConn *db.DB
-
-func init() {
-	conn, err := db.Connect()
-	if err != nil {
-		panic(err)
-	}
-	dbConn = conn
-}
 
 func buildRespone(article interface{}, nextPageKey string) fiber.Map {
 	if article == nil {
@@ -32,6 +23,10 @@ func buildRespone(article interface{}, nextPageKey string) fiber.Map {
 }
 
 func GetHead() func(c *fiber.Ctx) error {
+	dbConn, err := db.Connect()
+	if err != nil {
+		log.Fatalf("failed to connect db: %v", err)
+	}
 	return func(c *fiber.Ctx) error {
 		key := c.Params("key")
 		u, err := uuid.Parse(key)
@@ -50,6 +45,10 @@ func GetHead() func(c *fiber.Ctx) error {
 }
 
 func GetPage() func(c *fiber.Ctx) error {
+	dbConn, err := db.Connect()
+	if err != nil {
+		log.Fatalf("failed to connect db: %v", err)
+	}
 	return func(c *fiber.Ctx) error {
 		key := c.Params("key")
 		u, err := uuid.Parse(key)

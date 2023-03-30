@@ -3,6 +3,7 @@ package pagelistServer
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/db"
 	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/db/pagelist"
@@ -14,19 +15,13 @@ type Server struct {
 	pb.UnimplementedPageListServiceServer
 }
 
-var dbConn *db.DB
-
-func init() {
-	conn, err := db.Connect()
-	if err != nil {
-		panic(err)
-	}
-	dbConn = conn
-}
-
 func (s *Server) New(context.Context, *pb.Empty) (*pb.PageList, error) {
+	dbConn, err := db.Connect()
+	if err != nil {
+		log.Fatalf("failed to connect db: %v", err)
+	}
 	pl := pagelist.New()
-	err := dbConn.CreatePageList(pl)
+	err = dbConn.CreatePageList(pl)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create: %v", err)
 	}
@@ -34,6 +29,10 @@ func (s *Server) New(context.Context, *pb.Empty) (*pb.PageList, error) {
 }
 
 func (s *Server) Delete(ctx context.Context, req *pb.DeleteRequest) (*pb.Empty, error) {
+	dbConn, err := db.Connect()
+	if err != nil {
+		log.Fatalf("failed to connect db: %v", err)
+	}
 	u, err := uuid.Parse(req.ListKey)
 	if err != nil {
 		return nil, fmt.Errorf("invalid key: %s", req.ListKey)
@@ -46,6 +45,10 @@ func (s *Server) Delete(ctx context.Context, req *pb.DeleteRequest) (*pb.Empty, 
 }
 
 func (s *Server) Begin(ctx context.Context, req *pb.BeginRequest) (*pb.PageIterator, error) {
+	dbConn, err := db.Connect()
+	if err != nil {
+		log.Fatalf("failed to connect db: %v", err)
+	}
 	u, err := uuid.Parse(req.ListKey)
 	if err != nil {
 		return nil, fmt.Errorf("invalid key: %s", req.ListKey)
@@ -58,6 +61,10 @@ func (s *Server) Begin(ctx context.Context, req *pb.BeginRequest) (*pb.PageItera
 }
 
 func (s *Server) End(ctx context.Context, req *pb.EndRequest) (*pb.PageIterator, error) {
+	dbConn, err := db.Connect()
+	if err != nil {
+		log.Fatalf("failed to connect db: %v", err)
+	}
 	u, err := uuid.Parse(req.ListKey)
 	if err != nil {
 		return nil, fmt.Errorf("invalid key: %s", req.ListKey)
@@ -70,6 +77,10 @@ func (s *Server) End(ctx context.Context, req *pb.EndRequest) (*pb.PageIterator,
 }
 
 func (s *Server) Next(ctx context.Context, req *pb.NextRequest) (*pb.PageIterator, error) {
+	dbConn, err := db.Connect()
+	if err != nil {
+		log.Fatalf("failed to connect db: %v", err)
+	}
 	u, err := uuid.Parse(req.IterKey)
 	if err != nil {
 		return nil, fmt.Errorf("invalid key: %s", req.IterKey)
@@ -82,6 +93,10 @@ func (s *Server) Next(ctx context.Context, req *pb.NextRequest) (*pb.PageIterato
 }
 
 func (s *Server) Prev(ctx context.Context, req *pb.PrevRequest) (*pb.PageIterator, error) {
+	dbConn, err := db.Connect()
+	if err != nil {
+		log.Fatalf("failed to connect db: %v", err)
+	}
 	u, err := uuid.Parse(req.IterKey)
 	if err != nil {
 		return nil, fmt.Errorf("invalid key: %s", req.IterKey)
@@ -94,6 +109,10 @@ func (s *Server) Prev(ctx context.Context, req *pb.PrevRequest) (*pb.PageIterato
 }
 
 func (s *Server) Clear(ctx context.Context, pl *pb.PageList) (*pb.Empty, error) {
+	dbConn, err := db.Connect()
+	if err != nil {
+		log.Fatalf("failed to connect db: %v", err)
+	}
 	u, err := uuid.Parse(pl.Key)
 	if err != nil {
 		return nil, fmt.Errorf("invalid key: %s", pl.Key)
@@ -106,6 +125,10 @@ func (s *Server) Clear(ctx context.Context, pl *pb.PageList) (*pb.Empty, error) 
 }
 
 func (s *Server) Insert(ctx context.Context, req *pb.InsertRequest) (*pb.PageIterator, error) {
+	dbConn, err := db.Connect()
+	if err != nil {
+		log.Fatalf("failed to connect db: %v", err)
+	}
 	u, err := uuid.Parse(req.IterKey)
 	if err != nil {
 		return nil, fmt.Errorf("invalid key: %s", req.IterKey)
@@ -118,6 +141,10 @@ func (s *Server) Insert(ctx context.Context, req *pb.InsertRequest) (*pb.PageIte
 }
 
 func (s *Server) Erase(ctx context.Context, req *pb.EraseRequest) (*pb.PageIterator, error) {
+	dbConn, err := db.Connect()
+	if err != nil {
+		log.Fatalf("failed to connect db: %v", err)
+	}
 	u, err := uuid.Parse(req.IterKey)
 	if err != nil {
 		return nil, fmt.Errorf("invalid key: %s", req.IterKey)
@@ -130,6 +157,10 @@ func (s *Server) Erase(ctx context.Context, req *pb.EraseRequest) (*pb.PageItera
 }
 
 func (s *Server) Set(ctx context.Context, req *pb.SetRequest) (*pb.PageIterator, error) {
+	dbConn, err := db.Connect()
+	if err != nil {
+		log.Fatalf("failed to connect db: %v", err)
+	}
 	u, err := uuid.Parse(req.IterKey)
 	if err != nil {
 		return nil, fmt.Errorf("invalid key: %s", req.IterKey)
@@ -142,6 +173,10 @@ func (s *Server) Set(ctx context.Context, req *pb.SetRequest) (*pb.PageIterator,
 }
 
 func (s *Server) PushBack(ctx context.Context, req *pb.PushRequest) (*pb.PageIterator, error) {
+	dbConn, err := db.Connect()
+	if err != nil {
+		log.Fatalf("failed to connect db: %v", err)
+	}
 	u, err := uuid.Parse(req.ListKey)
 	if err != nil {
 		return nil, fmt.Errorf("invalid key: %s", req.ListKey)
@@ -154,6 +189,10 @@ func (s *Server) PushBack(ctx context.Context, req *pb.PushRequest) (*pb.PageIte
 }
 
 func (s *Server) PopBack(ctx context.Context, req *pb.PopRequest) (*pb.Empty, error) {
+	dbConn, err := db.Connect()
+	if err != nil {
+		log.Fatalf("failed to connect db: %v", err)
+	}
 	u, err := uuid.Parse(req.ListKey)
 	if err != nil {
 		return nil, fmt.Errorf("invalid key: %s", req.ListKey)
@@ -166,6 +205,10 @@ func (s *Server) PopBack(ctx context.Context, req *pb.PopRequest) (*pb.Empty, er
 }
 
 func (s *Server) PushFront(ctx context.Context, req *pb.PushRequest) (*pb.PageIterator, error) {
+	dbConn, err := db.Connect()
+	if err != nil {
+		log.Fatalf("failed to connect db: %v", err)
+	}
 	u, err := uuid.Parse(req.ListKey)
 	if err != nil {
 		return nil, fmt.Errorf("invalid key: %s", req.ListKey)
@@ -178,6 +221,10 @@ func (s *Server) PushFront(ctx context.Context, req *pb.PushRequest) (*pb.PageIt
 }
 
 func (s *Server) PopFront(ctx context.Context, req *pb.PopRequest) (*pb.Empty, error) {
+	dbConn, err := db.Connect()
+	if err != nil {
+		log.Fatalf("failed to connect db: %v", err)
+	}
 	u, err := uuid.Parse(req.ListKey)
 	if err != nil {
 		return nil, fmt.Errorf("invalid key: %s", req.ListKey)
