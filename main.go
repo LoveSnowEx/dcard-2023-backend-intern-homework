@@ -61,12 +61,12 @@ func runGrpcui(addr, target string) error {
 	return http.ListenAndServe(addr, h)
 }
 
-func initExamplePages() {
-	count := 10
+func initExamplePages(count int) {
 	dbConn, err := db.Connect()
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
 	}
+	session := &db.DB{DB: dbConn.DB.Begin()}
 	for i := 1; i <= count; i++ {
 		page := page.Page{
 			Title:   fmt.Sprintf("Page %d", i),
@@ -74,10 +74,16 @@ func initExamplePages() {
 			Slug:    fmt.Sprintf("page-%d", i),
 		}
 		page.ID = uint(i)
-		err = dbConn.UpdatePage(&page)
+		err = session.UpdatePage(&page)
 		if err != nil {
+			session.DB.Rollback()
 			log.Fatalf("failed to create page: %v", err)
 		}
+	}
+	err = session.DB.Commit().Error
+	if err != nil {
+		session.DB.Rollback()
+		log.Fatalf("failed to commit: %v", err)
 	}
 }
 
@@ -94,7 +100,7 @@ func main() {
 		}
 	}()
 
-	initExamplePages()
+	initExamplePages(1000)
 
 	c := make(chan os.Signal, 1)
 	done := make(chan struct{}, 1)
