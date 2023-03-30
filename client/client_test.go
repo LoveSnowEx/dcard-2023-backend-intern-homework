@@ -20,19 +20,19 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	_, err := db.MockConnet()
-	if err != nil {
-		log.Fatalf("failed to connect db: %v", err)
-	}
-	defer db.MockClose()
 	go func() {
+		_, err := db.MockConnet()
+		if err != nil {
+			log.Fatalf("failed to connect db: %v", err)
+		}
+		defer db.MockClose()
 		err = service.RunGrpc(":50051")
 		if err != nil {
 			log.Fatalf("failed to run grpc: %v", err)
 		}
 	}()
 
-	conn, err := grpc.Dial(":50051", grpc.WithInsecure())
+	conn, err := grpc.Dial(":50051", grpc.WithBlock(), grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("failed to dial: %v", err)
 	}
@@ -217,6 +217,47 @@ func TestListPushFrontRandom100(t *testing.T) {
 	}
 
 	CompareList(t, l, res.Key)
+}
+
+func TestListPrev(t *testing.T) {
+	res, err := c.New(context.Background(), &pb.Empty{})
+	require.NoError(t, err)
+
+	l := list.New()
+
+	for i := 0; i < 100; i++ {
+		val := uint32(i + 1)
+
+		l.PushBack(val)
+
+		it, err := c.PushBack(context.Background(), &pb.PushRequest{ListKey: res.Key, PageId: val})
+		require.NoError(t, err)
+		require.NotNil(t, it)
+	}
+
+	it, err := c.Begin(context.Background(), &pb.BeginRequest{ListKey: res.Key})
+	require.NoError(t, err)
+	require.NotNil(t, it)
+
+	itEnd, err := c.End(context.Background(), &pb.EndRequest{ListKey: res.Key})
+	require.NoError(t, err)
+	require.NotNil(t, itEnd)
+
+	for i, e := 0, l.Front(); e != nil; i, e = i+1, e.Next() {
+		require.Equal(t, e.Value, it.PageId)
+		itOld := it
+		it, err = c.Next(context.Background(), &pb.NextRequest{IterKey: it.Key})
+		require.NoError(t, err)
+		require.NotNil(t, it)
+
+		itPrev, err := c.Prev(context.Background(), &pb.PrevRequest{IterKey: it.Key})
+		require.NoError(t, err)
+		require.NotNil(t, itPrev)
+
+		require.Equal(t, itOld.Key, itPrev.Key)
+	}
+
+	require.Equal(t, itEnd.Key, it.Key)
 }
 
 func TestDeleteList(t *testing.T) {
