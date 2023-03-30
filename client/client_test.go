@@ -30,7 +30,6 @@ func TestMain(m *testing.M) {
 		if err != nil {
 			log.Fatalf("failed to run grpc: %v", err)
 		}
-		defer db.MockClose()
 	}()
 
 	conn, err := grpc.Dial(":50051", grpc.WithInsecure())
