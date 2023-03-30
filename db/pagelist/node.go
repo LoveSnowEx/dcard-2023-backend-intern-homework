@@ -2,7 +2,6 @@ package pagelist
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/google/uuid"
 
@@ -22,7 +21,6 @@ type PageNode struct {
 }
 
 func (n *PageNode) BeforeCreate(tx *gorm.DB) error {
-	log.Println("before create page node")
 	if n.Key == uuid.Nil {
 		n.Key = uuid.New()
 	}
