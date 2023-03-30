@@ -2,26 +2,42 @@ package config
 
 import (
 	"log"
+	"path/filepath"
+	"runtime"
 
 	"github.com/spf13/viper"
 )
 
 var (
-	TimeZone   string
-	DBHost     string
-	DBPort     int
-	DBUser     string
-	DBPassword string
-	DBName     string
-	FiberPort  string
-	GrpcPort   string
-	GrpcuiPort string
+	TimeZone   string = "Asia/Taipei"
+	DBHost     string = "localhost"
+	DBPort     int    = 5432
+	DBUser     string = "postgres"
+	DBPassword string = "password"
+	DBName     string = "postgres"
+	FiberPort  string = "3000"
+	GrpcPort   string = "50051"
+	GrpcuiPort string = "8080"
 )
 
+func getCurrentPath() string {
+	_, filename, _, _ := runtime.Caller(1)
+
+	return filepath.Dir(filename)
+}
+
 func init() {
-	viper.SetConfigFile(".env")
-	if err := viper.ReadInConfig(); err != nil {
-		log.Fatalf("failed to read config: %v", err)
+	cwd := getCurrentPath()
+	rootwd := filepath.Join(cwd, "..")
+
+	viper.SetConfigType("env")
+	viper.AddConfigPath(rootwd)
+	viper.SetConfigName(".env")
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Printf("failed to read config: %v", err)
+		return
 	}
 
 	TimeZone = viper.GetString("TZ")
