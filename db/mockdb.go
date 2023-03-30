@@ -19,7 +19,7 @@ func MockConnet() (*DB, error) {
 	}
 
 	// Open connection
-	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{
+	conn, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{
 		Logger: logger.New(
 			log.New(os.Stdout, "\n", log.LstdFlags),
 			logger.Config{
@@ -34,9 +34,11 @@ func MockConnet() (*DB, error) {
 	}
 
 	// Migrate the schema
-	db.AutoMigrate(page.Page{}, pagelist.PageNode{}, pagelist.PageList{})
+	conn.AutoMigrate(page.Page{}, pagelist.PageNode{}, pagelist.PageList{})
 
-	return &DB{DB: db}, nil
+	db = &DB{DB: conn}
+
+	return db, nil
 }
 
 func MockClose() error {
@@ -49,9 +51,12 @@ func MockClose() error {
 		return fmt.Errorf("failed to close database connection: %w", err)
 	}
 
-	if err := dbConn.Close(); err != nil {
+	err = dbConn.Close()
+	if err != nil {
 		return fmt.Errorf("failed to close database connection: %w", err)
 	}
+
+	db = nil
 
 	os.Remove("test.db")
 

@@ -48,7 +48,7 @@ func Connect() (*DB, error) {
 	)
 
 	// Open connection
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+	conn, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.New(
 			log.New(os.Stdout, "\n", log.LstdFlags),
 			logger.Config{
@@ -63,12 +63,14 @@ func Connect() (*DB, error) {
 	}
 
 	// Enable extension for uuid
-	db.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";")
+	conn.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";")
 
 	// Migrate the schema
-	db.AutoMigrate(page.Page{}, pagelist.PageNode{}, pagelist.PageList{})
+	conn.AutoMigrate(page.Page{}, pagelist.PageNode{}, pagelist.PageList{})
 
-	return &DB{DB: db}, nil
+	db = &DB{DB: conn}
+
+	return db, nil
 }
 
 func Close() error {
@@ -76,14 +78,17 @@ func Close() error {
 		return nil
 	}
 
-	dbConn, err := db.DB.DB()
+	conn, err := db.DB.DB()
 	if err != nil {
 		return fmt.Errorf("failed to close database connection: %w", err)
 	}
 
-	if err := dbConn.Close(); err != nil {
+	err = conn.Close()
+	if err != nil {
 		return fmt.Errorf("failed to close database connection: %w", err)
 	}
+
+	db = nil
 
 	return nil
 }
