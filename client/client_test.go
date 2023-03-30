@@ -9,6 +9,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
+	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/db"
 	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/internal/service"
 	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/proto/pb"
 	"google.golang.org/grpc"
@@ -19,11 +20,17 @@ var (
 )
 
 func TestMain(m *testing.M) {
+	_, err := db.MockConnet()
+	if err != nil {
+		log.Fatalf("failed to connect db: %v", err)
+	}
+	defer db.MockClose()
 	go func() {
-		err := service.RunGrpc(":50051")
+		err = service.RunGrpc(":50051")
 		if err != nil {
 			log.Fatalf("failed to run grpc: %v", err)
 		}
+		defer db.MockClose()
 	}()
 
 	conn, err := grpc.Dial(":50051", grpc.WithInsecure())

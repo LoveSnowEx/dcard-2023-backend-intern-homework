@@ -11,6 +11,7 @@ require (
 	google.golang.org/grpc v1.52.0
 	google.golang.org/protobuf v1.30.0
 	gorm.io/driver/postgres v1.4.8
+	gorm.io/driver/sqlite v1.4.4
 	gorm.io/gorm v1.24.6
 )
 
@@ -32,6 +33,7 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
+	github.com/mattn/go-sqlite3 v1.14.15 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
 	github.com/philhofer/fwd v1.1.2 // indirect
