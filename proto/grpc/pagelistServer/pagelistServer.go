@@ -50,11 +50,11 @@ func (s *Server) Begin(ctx context.Context, req *pb.BeginRequest) (*pb.PageItera
 	if err != nil {
 		return nil, fmt.Errorf("invalid key: %s", req.ListKey)
 	}
-	end, err := dbConn.GetPageListEnd(u)
+	begin, err := dbConn.GetPageListBegin(u)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get begin: %v", err)
 	}
-	return &pb.PageIterator{Key: end.NextKey.String()}, nil
+	return &pb.PageIterator{Key: begin.Key.String(), PageId: uint32(begin.PageID)}, nil
 }
 
 func (s *Server) End(ctx context.Context, req *pb.EndRequest) (*pb.PageIterator, error) {
@@ -78,7 +78,7 @@ func (s *Server) Next(ctx context.Context, req *pb.NextRequest) (*pb.PageIterato
 	if err != nil {
 		return nil, fmt.Errorf("failed to get next: %v", err)
 	}
-	return &pb.PageIterator{Key: next.Key.String()}, nil
+	return &pb.PageIterator{Key: next.Key.String(), PageId: uint32(next.PageID)}, nil
 }
 
 func (s *Server) Prev(ctx context.Context, req *pb.PrevRequest) (*pb.PageIterator, error) {
@@ -90,7 +90,7 @@ func (s *Server) Prev(ctx context.Context, req *pb.PrevRequest) (*pb.PageIterato
 	if err != nil {
 		return nil, fmt.Errorf("failed to get prev: %v", err)
 	}
-	return &pb.PageIterator{Key: prev.Key.String()}, nil
+	return &pb.PageIterator{Key: prev.Key.String(), PageId: uint32(prev.PageID)}, nil
 }
 
 func (s *Server) Clear(ctx context.Context, pl *pb.PageList) (*pb.Empty, error) {
