@@ -224,4 +224,10 @@ func TestDeleteList(t *testing.T) {
 
 	_, err = c.Delete(context.Background(), &pb.DeleteRequest{ListKey: res.Key})
 	require.NoError(t, err)
+
+	_, err = c.Begin(context.Background(), &pb.BeginRequest{ListKey: res.Key})
+	require.Error(t, err)
+
+	_, err = c.End(context.Background(), &pb.EndRequest{ListKey: res.Key})
+	require.Error(t, err)
 }
