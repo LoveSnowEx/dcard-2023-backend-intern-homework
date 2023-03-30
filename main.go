@@ -1,11 +1,8 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
-	"net"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -13,53 +10,8 @@ import (
 	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/config"
 	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/db"
 	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/db/page"
-	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/internal/router"
-	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/proto/grpc/pagelistServer"
-	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/proto/pb"
-	"github.com/fullstorydev/grpcui/standalone"
-	"github.com/gofiber/fiber/v2"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/reflection"
+	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/internal/service"
 )
-
-func runFiber(addr string) error {
-	app := fiber.New()
-	router.Setup(app)
-
-	return app.Listen(addr)
-}
-
-func runGrpc(addr string) error {
-	lis, err := net.Listen("tcp", addr)
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-
-	srv := grpc.NewServer()
-	reflection.Register(srv)
-	pb.RegisterPageListServiceServer(srv, &pagelistServer.Server{})
-
-	return srv.Serve(lis)
-}
-
-func runGrpcui(addr, target string) error {
-	ctx := context.Background()
-	cc, err := grpc.DialContext(
-		ctx,
-		target,
-		grpc.WithBlock(),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
-	if err != nil {
-		return err
-	}
-	h, err := standalone.HandlerViaReflection(ctx, cc, target)
-	if err != nil {
-		return err
-	}
-	return http.ListenAndServe(addr, h)
-}
 
 func initExamplePages(count int) {
 	dbConn, err := db.Connect()
@@ -114,15 +66,15 @@ func main() {
 		done <- struct{}{}
 	}()
 	go func() {
-		log.Fatalln(runFiber(":" + config.FiberPort))
+		log.Fatalln(service.RunFiber(":" + config.FiberPort))
 		done <- struct{}{}
 	}()
 	go func() {
-		log.Fatalln(runGrpc(":" + config.GrpcPort))
+		log.Fatalln(service.RunGrpc(":" + config.GrpcPort))
 		done <- struct{}{}
 	}()
 	go func() {
-		log.Fatalln(runGrpcui(":"+config.GrpcuiPort, ":"+config.GrpcPort))
+		log.Fatalln(service.RunGrpcui(":"+config.GrpcuiPort, ":"+config.GrpcPort))
 		done <- struct{}{}
 	}()
 
