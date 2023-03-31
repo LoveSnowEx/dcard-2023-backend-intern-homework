@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	c pb.PageListServiceClient
+	client pb.PageListServiceClient
 )
 
 func TestMain(m *testing.M) {
@@ -37,62 +37,62 @@ func TestMain(m *testing.M) {
 		log.Fatalf("failed to dial: %v", err)
 	}
 	defer conn.Close()
-	c = pb.NewPageListServiceClient(conn)
+	client = pb.NewPageListServiceClient(conn)
 
 	m.Run()
 }
 
-func TestNewList(t *testing.T) {
-	res, err := c.New(context.Background(), &pb.Empty{})
+func TestNew(t *testing.T) {
+	res, err := client.New(context.Background(), &pb.Empty{})
 	require.NoError(t, err)
 	require.NotNil(t, res)
 }
 
-func TestListEnd(t *testing.T) {
-	res, err := c.New(context.Background(), &pb.Empty{})
+func TestEnd(t *testing.T) {
+	res, err := client.New(context.Background(), &pb.Empty{})
 	require.NoError(t, err)
 
-	it, err := c.End(context.Background(), &pb.EndRequest{ListKey: res.Key})
+	it, err := client.End(context.Background(), &pb.EndRequest{ListKey: res.Key})
 	require.NoError(t, err)
 	require.NotNil(t, it)
 }
 
-func TestListBegin(t *testing.T) {
-	res, err := c.New(context.Background(), &pb.Empty{})
+func TestBegin(t *testing.T) {
+	res, err := client.New(context.Background(), &pb.Empty{})
 	require.NoError(t, err)
 
-	itBegin, err := c.Begin(context.Background(), &pb.BeginRequest{ListKey: res.Key})
+	beginIt, err := client.Begin(context.Background(), &pb.BeginRequest{ListKey: res.Key})
 	require.NoError(t, err)
-	require.NotNil(t, itBegin)
+	require.NotNil(t, beginIt)
 
-	itEnd, err := c.End(context.Background(), &pb.EndRequest{ListKey: res.Key})
+	endIt, err := client.End(context.Background(), &pb.EndRequest{ListKey: res.Key})
 	require.NoError(t, err)
-	require.NotNil(t, itEnd)
+	require.NotNil(t, endIt)
 
-	require.Equal(t, itBegin.Key, itEnd.Key)
+	require.Equal(t, beginIt.Key, endIt.Key)
 }
 
 func CompareList(t *testing.T, l *list.List, listKey string) {
-	it, err := c.Begin(context.Background(), &pb.BeginRequest{ListKey: listKey})
+	it, err := client.Begin(context.Background(), &pb.BeginRequest{ListKey: listKey})
 	require.NoError(t, err)
 	require.NotNil(t, it)
 
-	itEnd, err := c.End(context.Background(), &pb.EndRequest{ListKey: listKey})
+	endIt, err := client.End(context.Background(), &pb.EndRequest{ListKey: listKey})
 	require.NoError(t, err)
-	require.NotNil(t, itEnd)
+	require.NotNil(t, endIt)
 
 	for i, e := 0, l.Front(); e != nil; i, e = i+1, e.Next() {
 		require.Equal(t, e.Value, it.PageId)
-		it, err = c.Next(context.Background(), &pb.NextRequest{IterKey: it.Key})
+		it, err = client.Next(context.Background(), &pb.NextRequest{IterKey: it.Key})
 		require.NoError(t, err)
 		require.NotNil(t, it)
 	}
 
-	require.Equal(t, itEnd.Key, it.Key)
+	require.Equal(t, endIt.Key, it.Key)
 }
 
-func TestListPushBack0(t *testing.T) {
-	res, err := c.New(context.Background(), &pb.Empty{})
+func TestPushBack0(t *testing.T) {
+	res, err := client.New(context.Background(), &pb.Empty{})
 	require.NoError(t, err)
 
 	l := list.New()
@@ -100,8 +100,8 @@ func TestListPushBack0(t *testing.T) {
 	CompareList(t, l, res.Key)
 }
 
-func TestListPushBack1(t *testing.T) {
-	res, err := c.New(context.Background(), &pb.Empty{})
+func TestPushBack1(t *testing.T) {
+	res, err := client.New(context.Background(), &pb.Empty{})
 	require.NoError(t, err)
 
 	l := list.New()
@@ -110,15 +110,15 @@ func TestListPushBack1(t *testing.T) {
 
 	l.PushBack(val)
 
-	it, err := c.PushBack(context.Background(), &pb.PushRequest{ListKey: res.Key, PageId: val})
+	it, err := client.PushBack(context.Background(), &pb.PushRequest{ListKey: res.Key, PageId: val})
 	require.NoError(t, err)
 	require.NotNil(t, it)
 
 	CompareList(t, l, res.Key)
 }
 
-func TestListPushBack100(t *testing.T) {
-	res, err := c.New(context.Background(), &pb.Empty{})
+func TestPushBack100(t *testing.T) {
+	res, err := client.New(context.Background(), &pb.Empty{})
 	require.NoError(t, err)
 
 	l := list.New()
@@ -128,7 +128,7 @@ func TestListPushBack100(t *testing.T) {
 
 		l.PushBack(val)
 
-		it, err := c.PushBack(context.Background(), &pb.PushRequest{ListKey: res.Key, PageId: val})
+		it, err := client.PushBack(context.Background(), &pb.PushRequest{ListKey: res.Key, PageId: val})
 		require.NoError(t, err)
 		require.NotNil(t, it)
 	}
@@ -136,8 +136,8 @@ func TestListPushBack100(t *testing.T) {
 	CompareList(t, l, res.Key)
 }
 
-func TestListPushBackRandom100(t *testing.T) {
-	res, err := c.New(context.Background(), &pb.Empty{})
+func TestPushBackRandom100(t *testing.T) {
+	res, err := client.New(context.Background(), &pb.Empty{})
 	require.NoError(t, err)
 
 	l := list.New()
@@ -147,7 +147,7 @@ func TestListPushBackRandom100(t *testing.T) {
 
 		l.PushBack(val)
 
-		it, err := c.PushBack(context.Background(), &pb.PushRequest{ListKey: res.Key, PageId: val})
+		it, err := client.PushBack(context.Background(), &pb.PushRequest{ListKey: res.Key, PageId: val})
 		require.NoError(t, err)
 		require.NotNil(t, it)
 	}
@@ -155,8 +155,8 @@ func TestListPushBackRandom100(t *testing.T) {
 	CompareList(t, l, res.Key)
 }
 
-func TestListPushFront0(t *testing.T) {
-	res, err := c.New(context.Background(), &pb.Empty{})
+func TestPushFront0(t *testing.T) {
+	res, err := client.New(context.Background(), &pb.Empty{})
 	require.NoError(t, err)
 
 	l := list.New()
@@ -164,8 +164,8 @@ func TestListPushFront0(t *testing.T) {
 	CompareList(t, l, res.Key)
 }
 
-func TestListPushFront1(t *testing.T) {
-	res, err := c.New(context.Background(), &pb.Empty{})
+func TestPushFront1(t *testing.T) {
+	res, err := client.New(context.Background(), &pb.Empty{})
 	require.NoError(t, err)
 
 	l := list.New()
@@ -174,15 +174,15 @@ func TestListPushFront1(t *testing.T) {
 
 	l.PushFront(val)
 
-	it, err := c.PushFront(context.Background(), &pb.PushRequest{ListKey: res.Key, PageId: val})
+	it, err := client.PushFront(context.Background(), &pb.PushRequest{ListKey: res.Key, PageId: val})
 	require.NoError(t, err)
 	require.NotNil(t, it)
 
 	CompareList(t, l, res.Key)
 }
 
-func TestListPushFront100(t *testing.T) {
-	res, err := c.New(context.Background(), &pb.Empty{})
+func TestPushFront100(t *testing.T) {
+	res, err := client.New(context.Background(), &pb.Empty{})
 	require.NoError(t, err)
 
 	l := list.New()
@@ -192,7 +192,7 @@ func TestListPushFront100(t *testing.T) {
 
 		l.PushFront(val)
 
-		it, err := c.PushFront(context.Background(), &pb.PushRequest{ListKey: res.Key, PageId: val})
+		it, err := client.PushFront(context.Background(), &pb.PushRequest{ListKey: res.Key, PageId: val})
 		require.NoError(t, err)
 		require.NotNil(t, it)
 	}
@@ -200,8 +200,8 @@ func TestListPushFront100(t *testing.T) {
 	CompareList(t, l, res.Key)
 }
 
-func TestListPushFrontRandom100(t *testing.T) {
-	res, err := c.New(context.Background(), &pb.Empty{})
+func TestPushFrontRandom100(t *testing.T) {
+	res, err := client.New(context.Background(), &pb.Empty{})
 	require.NoError(t, err)
 
 	l := list.New()
@@ -211,7 +211,7 @@ func TestListPushFrontRandom100(t *testing.T) {
 
 		l.PushFront(val)
 
-		it, err := c.PushFront(context.Background(), &pb.PushRequest{ListKey: res.Key, PageId: val})
+		it, err := client.PushFront(context.Background(), &pb.PushRequest{ListKey: res.Key, PageId: val})
 		require.NoError(t, err)
 		require.NotNil(t, it)
 	}
@@ -219,8 +219,8 @@ func TestListPushFrontRandom100(t *testing.T) {
 	CompareList(t, l, res.Key)
 }
 
-func TestListPrev(t *testing.T) {
-	res, err := c.New(context.Background(), &pb.Empty{})
+func TestPrev(t *testing.T) {
+	res, err := client.New(context.Background(), &pb.Empty{})
 	require.NoError(t, err)
 
 	l := list.New()
@@ -230,45 +230,45 @@ func TestListPrev(t *testing.T) {
 
 		l.PushBack(val)
 
-		it, err := c.PushBack(context.Background(), &pb.PushRequest{ListKey: res.Key, PageId: val})
+		it, err := client.PushBack(context.Background(), &pb.PushRequest{ListKey: res.Key, PageId: val})
 		require.NoError(t, err)
 		require.NotNil(t, it)
 	}
 
-	it, err := c.Begin(context.Background(), &pb.BeginRequest{ListKey: res.Key})
+	it, err := client.Begin(context.Background(), &pb.BeginRequest{ListKey: res.Key})
 	require.NoError(t, err)
 	require.NotNil(t, it)
 
-	itEnd, err := c.End(context.Background(), &pb.EndRequest{ListKey: res.Key})
+	endIt, err := client.End(context.Background(), &pb.EndRequest{ListKey: res.Key})
 	require.NoError(t, err)
-	require.NotNil(t, itEnd)
+	require.NotNil(t, endIt)
 
 	for i, e := 0, l.Front(); e != nil; i, e = i+1, e.Next() {
 		require.Equal(t, e.Value, it.PageId)
-		itOld := it
-		it, err = c.Next(context.Background(), &pb.NextRequest{IterKey: it.Key})
+		oldIt := it
+		it, err = client.Next(context.Background(), &pb.NextRequest{IterKey: it.Key})
 		require.NoError(t, err)
 		require.NotNil(t, it)
 
-		itPrev, err := c.Prev(context.Background(), &pb.PrevRequest{IterKey: it.Key})
+		prevIt, err := client.Prev(context.Background(), &pb.PrevRequest{IterKey: it.Key})
 		require.NoError(t, err)
-		require.NotNil(t, itPrev)
+		require.NotNil(t, prevIt)
 
-		require.Equal(t, itOld.Key, itPrev.Key)
+		require.Equal(t, oldIt.Key, prevIt.Key)
 	}
 
-	require.Equal(t, itEnd.Key, it.Key)
+	require.Equal(t, endIt.Key, it.Key)
 }
 
-func TestDeleteList(t *testing.T) {
-	res, err := c.New(context.Background(), &pb.Empty{})
+func TestDelete(t *testing.T) {
+	res, err := client.New(context.Background(), &pb.Empty{})
 
-	_, err = c.Delete(context.Background(), &pb.DeleteRequest{ListKey: res.Key})
+	_, err = client.Delete(context.Background(), &pb.DeleteRequest{ListKey: res.Key})
 	require.NoError(t, err)
 
-	_, err = c.Begin(context.Background(), &pb.BeginRequest{ListKey: res.Key})
+	_, err = client.Begin(context.Background(), &pb.BeginRequest{ListKey: res.Key})
 	require.Error(t, err)
 
-	_, err = c.End(context.Background(), &pb.EndRequest{ListKey: res.Key})
+	_, err = client.End(context.Background(), &pb.EndRequest{ListKey: res.Key})
 	require.Error(t, err)
 }
