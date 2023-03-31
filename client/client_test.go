@@ -273,3 +273,33 @@ func TestDelete(t *testing.T) {
 	_, err = client.End(context.Background(), &pb.EndRequest{ListKey: res.Key})
 	require.Error(t, err)
 }
+
+func TestClear(t *testing.T) {
+	res, err := client.New(context.Background(), &pb.Empty{})
+	require.NoError(t, err)
+
+	l := list.New()
+
+	for i := 0; i < 100; i++ {
+		val := uint32(i + 1)
+
+		l.PushBack(val)
+
+		it, err := client.PushBack(context.Background(), &pb.PushRequest{ListKey: res.Key, PageId: val})
+		require.NoError(t, err)
+		require.NotNil(t, it)
+	}
+
+	_, err = client.Clear(context.Background(), &pb.ClearRequest{ListKey: res.Key})
+	require.NoError(t, err)
+
+	it, err := client.Begin(context.Background(), &pb.BeginRequest{ListKey: res.Key})
+	require.NoError(t, err)
+	require.NotNil(t, it)
+
+	endIt, err := client.End(context.Background(), &pb.EndRequest{ListKey: res.Key})
+	require.NoError(t, err)
+	require.NotNil(t, endIt)
+
+	require.Equal(t, endIt.Key, it.Key)
+}
