@@ -8,17 +8,29 @@ import (
 	"github.com/spf13/viper"
 )
 
-var (
-	TimeZone   string = "Asia/Taipei"
-	DBHost     string = "localhost"
-	DBPort     int    = 5432
-	DBUser     string = "postgres"
-	DBPassword string = "password"
-	DBName     string = "postgres"
-	FiberPort  string = "3000"
-	GrpcPort   string = "50051"
-	GrpcuiPort string = "8080"
-)
+var Default = Config{
+	TimeZone:   "Asia/Taipei",
+	DBHost:     "localhost",
+	DBPort:     "5432",
+	DBUser:     "postgres",
+	DBPassword: "password",
+	DBName:     "postgres",
+	FiberPort:  "3000",
+	GrpcPort:   "50051",
+	GrpcuiPort: "8080",
+}
+
+type Config struct {
+	TimeZone   string
+	DBHost     string
+	DBPort     string
+	DBUser     string
+	DBPassword string
+	DBName     string
+	FiberPort  string
+	GrpcPort   string
+	GrpcuiPort string
+}
 
 func getCurrentPath() string {
 	_, filename, _, _ := runtime.Caller(1)
@@ -30,25 +42,27 @@ func init() {
 	cwd := getCurrentPath()
 	rootwd := filepath.Join(cwd, "..")
 
-	viper.SetConfigType("env")
 	viper.AddConfigPath(rootwd)
+	viper.SetConfigType("env")
 	viper.SetConfigName(".env")
+}
 
+func Get() Config {
 	err := viper.ReadInConfig()
 	if err != nil {
 		log.Printf("failed to read config: %v", err)
-		return
+		return Default
 	}
 
-	TimeZone = viper.GetString("TZ")
-
-	DBHost = viper.GetString("DB_HOST")
-	DBPort = viper.GetInt("DB_PORT")
-	DBUser = viper.GetString("DB_USER")
-	DBPassword = viper.GetString("DB_PASSWORD")
-	DBName = viper.GetString("DB_NAME")
-
-	FiberPort = viper.GetString("FIBER_PORT")
-	GrpcPort = viper.GetString("GRPC_PORT")
-	GrpcuiPort = viper.GetString("GRPCUI_PORT")
+	return Config{
+		TimeZone:   viper.GetString("TZ"),
+		DBHost:     viper.GetString("DB_HOST"),
+		DBPort:     viper.GetString("DB_PORT"),
+		DBUser:     viper.GetString("DB_USER"),
+		DBPassword: viper.GetString("DB_PASSWORD"),
+		DBName:     viper.GetString("DB_NAME"),
+		FiberPort:  viper.GetString("FIBER_PORT"),
+		GrpcPort:   viper.GetString("GRPC_PORT"),
+		GrpcuiPort: viper.GetString("GRPCUI_PORT"),
+	}
 }

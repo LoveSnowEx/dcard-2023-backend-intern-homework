@@ -59,6 +59,8 @@ func main() {
 
 	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
 
+	conf := config.Get()
+
 	go func() {
 		sig := <-c
 		fmt.Println()
@@ -66,15 +68,15 @@ func main() {
 		done <- struct{}{}
 	}()
 	go func() {
-		log.Fatalln(service.RunFiber(":" + config.FiberPort))
+		log.Fatalln(service.RunFiber(":" + conf.FiberPort))
 		done <- struct{}{}
 	}()
 	go func() {
-		log.Fatalln(service.RunGrpc(":" + config.GrpcPort))
+		log.Fatalln(service.RunGrpc(":" + conf.GrpcPort))
 		done <- struct{}{}
 	}()
 	go func() {
-		log.Fatalln(service.RunGrpcui(":"+config.GrpcuiPort, ":"+config.GrpcPort))
+		log.Fatalln(service.RunGrpcui(":"+conf.GrpcuiPort, ":"+conf.GrpcPort))
 		done <- struct{}{}
 	}()
 

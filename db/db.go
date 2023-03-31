@@ -28,17 +28,19 @@ func Connect() (*DB, error) {
 		return db, nil
 	}
 
+	conf := config.Get()
+
 	// Get config
-	host := config.DBHost
-	port := config.DBPort
-	user := config.DBUser
-	password := config.DBPassword
-	dbname := config.DBName
-	timezone := config.TimeZone
+	host := conf.DBHost
+	port := conf.DBPort
+	user := conf.DBUser
+	password := conf.DBPassword
+	dbname := conf.DBName
+	timezone := conf.TimeZone
 
 	// Build data source name
 	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=%s",
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=%s",
 		host,
 		user,
 		password,
