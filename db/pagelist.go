@@ -68,6 +68,24 @@ func (db *DB) ClonePageList(key uuid.UUID) (*pl.PageList, error) {
 	return newList, nil
 }
 
+func (db *DB) ClearPageList(key uuid.UUID) error {
+	err := db.DB.Delete(&pl.PageNode{}, "\"list_key\" = ? AND \"end\" = ?", key, false).Error
+	if err != nil {
+		return fmt.Errorf("clear page list: %v", err)
+	}
+	end, err := db.GetPageListEnd(key)
+	if err != nil {
+		return fmt.Errorf("clear page list: %v", err)
+	}
+	end.NextKey = end.Key
+	end.PrevKey = end.Key
+	err = db.DB.Save(&end).Error
+	if err != nil {
+		return fmt.Errorf("clear page list: %v", err)
+	}
+	return nil
+}
+
 // Retrieve a page node by key
 func (db *DB) GetPageNodeByKey(key uuid.UUID) (*pl.PageNode, error) {
 	var node pl.PageNode

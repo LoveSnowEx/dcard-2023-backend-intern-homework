@@ -117,7 +117,7 @@ func (s *Server) Clear(ctx context.Context, req *pb.ClearRequest) (*pb.Empty, er
 	if err != nil {
 		return nil, fmt.Errorf("invalid key: %s", req.ListKey)
 	}
-	err = dbConn.DeletePageList(u)
+	err = dbConn.ClearPageList(u)
 	if err != nil {
 		return nil, fmt.Errorf("failed to clear: %v", err)
 	}
