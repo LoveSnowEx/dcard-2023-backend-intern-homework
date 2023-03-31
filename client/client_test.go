@@ -437,3 +437,30 @@ func TestPopBack(t *testing.T) {
 
 	CompareList(t, l, res.Key)
 }
+
+func TestPopFront(t *testing.T) {
+	res, err := client.New(context.Background(), &pb.Empty{})
+	require.NoError(t, err)
+
+	l := list.New()
+
+	for i := 0; i < 100; i++ {
+		val := uint32(i + 1)
+
+		l.PushBack(val)
+
+		it, err := client.PushBack(context.Background(), &pb.PushRequest{ListKey: res.Key, PageId: val})
+		require.NoError(t, err)
+		require.NotNil(t, it)
+	}
+
+	for i := 0; i < 100; i++ {
+		l.Remove(l.Front())
+
+		it, err := client.PopFront(context.Background(), &pb.PopRequest{ListKey: res.Key})
+		require.NoError(t, err)
+		require.NotNil(t, it)
+	}
+
+	CompareList(t, l, res.Key)
+}
