@@ -20,12 +20,13 @@ var (
 )
 
 func TestMain(m *testing.M) {
+	_, err := db.MockConnet()
+	if err != nil {
+		log.Fatalf("failed to connect db: %v", err)
+	}
+	defer db.MockClose()
+
 	go func() {
-		_, err := db.MockConnet()
-		if err != nil {
-			log.Fatalf("failed to connect db: %v", err)
-		}
-		defer db.MockClose()
 		err = service.RunGrpc(":50051")
 		if err != nil {
 			log.Fatalf("failed to run grpc: %v", err)
