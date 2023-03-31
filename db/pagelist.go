@@ -272,7 +272,7 @@ func (db *DB) PopBackPageList(key uuid.UUID) error {
 	if err != nil {
 		return fmt.Errorf("pop back page list: %v", err)
 	}
-	_, err = db.ErasePageNode(end.Key)
+	_, err = db.ErasePageNode(end.PrevKey)
 	if err != nil {
 		return fmt.Errorf("pop back page list: %v", err)
 	}
