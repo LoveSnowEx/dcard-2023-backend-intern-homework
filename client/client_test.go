@@ -379,3 +379,34 @@ func TestErase(t *testing.T) {
 
 	CompareList(t, l, res.Key)
 }
+
+func TestSet(t *testing.T) {
+	res, err := client.New(context.Background(), &pb.Empty{})
+	require.NoError(t, err)
+
+	l := list.New()
+
+	for i := 0; i < 100; i++ {
+		val := uint32(i + 1)
+
+		l.PushBack(val)
+
+		it, err := client.PushBack(context.Background(), &pb.PushRequest{ListKey: res.Key, PageId: val})
+		require.NoError(t, err)
+		require.NotNil(t, it)
+	}
+
+	for i := 0; i < 100; i++ {
+		e, it := RandIter(t, l, res.Key)
+
+		val := uint32(i + 1)
+
+		e.Value = val
+
+		it, err = client.Set(context.Background(), &pb.SetRequest{IterKey: it.Key, PageId: val})
+		require.NoError(t, err)
+		require.NotNil(t, it)
+	}
+
+	CompareList(t, l, res.Key)
+}
