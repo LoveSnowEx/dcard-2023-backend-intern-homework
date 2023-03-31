@@ -263,6 +263,7 @@ func TestPrev(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	res, err := client.New(context.Background(), &pb.Empty{})
+	require.NoError(t, err)
 
 	_, err = client.Delete(context.Background(), &pb.DeleteRequest{ListKey: res.Key})
 	require.NoError(t, err)
