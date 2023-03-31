@@ -108,14 +108,14 @@ func (s *Server) Prev(ctx context.Context, req *pb.PrevRequest) (*pb.PageIterato
 	return &pb.PageIterator{Key: prev.Key.String(), PageId: uint32(prev.PageID)}, nil
 }
 
-func (s *Server) Clear(ctx context.Context, pl *pb.PageList) (*pb.Empty, error) {
+func (s *Server) Clear(ctx context.Context, req *pb.ClearRequest) (*pb.Empty, error) {
 	dbConn, err := db.Connect()
 	if err != nil {
 		log.Fatalf("failed to connect db: %v", err)
 	}
-	u, err := uuid.Parse(pl.Key)
+	u, err := uuid.Parse(req.ListKey)
 	if err != nil {
-		return nil, fmt.Errorf("invalid key: %s", pl.Key)
+		return nil, fmt.Errorf("invalid key: %s", req.ListKey)
 	}
 	err = dbConn.DeletePageList(u)
 	if err != nil {

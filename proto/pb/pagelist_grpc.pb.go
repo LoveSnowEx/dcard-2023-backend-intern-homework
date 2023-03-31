@@ -45,7 +45,7 @@ type PageListServiceClient interface {
 	End(ctx context.Context, in *EndRequest, opts ...grpc.CallOption) (*PageIterator, error)
 	Next(ctx context.Context, in *NextRequest, opts ...grpc.CallOption) (*PageIterator, error)
 	Prev(ctx context.Context, in *PrevRequest, opts ...grpc.CallOption) (*PageIterator, error)
-	Clear(ctx context.Context, in *PageList, opts ...grpc.CallOption) (*Empty, error)
+	Clear(ctx context.Context, in *ClearRequest, opts ...grpc.CallOption) (*Empty, error)
 	Insert(ctx context.Context, in *InsertRequest, opts ...grpc.CallOption) (*PageIterator, error)
 	Erase(ctx context.Context, in *EraseRequest, opts ...grpc.CallOption) (*PageIterator, error)
 	Set(ctx context.Context, in *SetRequest, opts ...grpc.CallOption) (*PageIterator, error)
@@ -117,7 +117,7 @@ func (c *pageListServiceClient) Prev(ctx context.Context, in *PrevRequest, opts 
 	return out, nil
 }
 
-func (c *pageListServiceClient) Clear(ctx context.Context, in *PageList, opts ...grpc.CallOption) (*Empty, error) {
+func (c *pageListServiceClient) Clear(ctx context.Context, in *ClearRequest, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
 	err := c.cc.Invoke(ctx, PageListService_Clear_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -199,7 +199,7 @@ type PageListServiceServer interface {
 	End(context.Context, *EndRequest) (*PageIterator, error)
 	Next(context.Context, *NextRequest) (*PageIterator, error)
 	Prev(context.Context, *PrevRequest) (*PageIterator, error)
-	Clear(context.Context, *PageList) (*Empty, error)
+	Clear(context.Context, *ClearRequest) (*Empty, error)
 	Insert(context.Context, *InsertRequest) (*PageIterator, error)
 	Erase(context.Context, *EraseRequest) (*PageIterator, error)
 	Set(context.Context, *SetRequest) (*PageIterator, error)
@@ -232,7 +232,7 @@ func (UnimplementedPageListServiceServer) Next(context.Context, *NextRequest) (*
 func (UnimplementedPageListServiceServer) Prev(context.Context, *PrevRequest) (*PageIterator, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Prev not implemented")
 }
-func (UnimplementedPageListServiceServer) Clear(context.Context, *PageList) (*Empty, error) {
+func (UnimplementedPageListServiceServer) Clear(context.Context, *ClearRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Clear not implemented")
 }
 func (UnimplementedPageListServiceServer) Insert(context.Context, *InsertRequest) (*PageIterator, error) {
@@ -378,7 +378,7 @@ func _PageListService_Prev_Handler(srv interface{}, ctx context.Context, dec fun
 }
 
 func _PageListService_Clear_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PageList)
+	in := new(ClearRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -390,7 +390,7 @@ func _PageListService_Clear_Handler(srv interface{}, ctx context.Context, dec fu
 		FullMethod: PageListService_Clear_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PageListServiceServer).Clear(ctx, req.(*PageList))
+		return srv.(PageListServiceServer).Clear(ctx, req.(*ClearRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

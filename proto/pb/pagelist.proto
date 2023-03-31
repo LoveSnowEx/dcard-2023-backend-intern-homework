@@ -43,6 +43,11 @@ message PrevRequest {
   string iter_key = 1;
 }
 
+message ClearRequest {
+  string list_key = 1;
+}
+
+
 message InsertRequest {
   string iter_key = 1;
   uint32 page_id = 2;
@@ -73,7 +78,7 @@ service PageListService {
   rpc End(EndRequest) returns (PageIterator) {}
   rpc Next(NextRequest) returns (PageIterator) {}
   rpc Prev(PrevRequest) returns (PageIterator) {}
-  rpc Clear(PageList) returns (Empty) {}
+  rpc Clear(ClearRequest) returns (Empty) {}
   rpc Insert(InsertRequest) returns (PageIterator) {}
   rpc Erase(EraseRequest) returns (PageIterator) {}
   rpc Set(SetRequest) returns (PageIterator) {}
