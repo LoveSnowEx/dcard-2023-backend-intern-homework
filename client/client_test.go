@@ -27,7 +27,7 @@ func TestMain(m *testing.M) {
 	defer db.MockClose()
 
 	go func() {
-		err = service.RunGrpc(":50051")
+		err := service.RunGrpc(":50051")
 		if err != nil {
 			log.Fatalf("failed to run grpc: %v", err)
 		}
@@ -302,4 +302,50 @@ func TestClear(t *testing.T) {
 	require.NotNil(t, endIt)
 
 	require.Equal(t, endIt.Key, it.Key)
+}
+
+func RandIter(t *testing.T, l *list.List, key string) (*list.Element, *pb.PageIterator) {
+	it, err := client.Begin(context.Background(), &pb.BeginRequest{ListKey: key})
+	require.NoError(t, err)
+	require.NotNil(t, it)
+
+	r := rand.Intn(l.Len())
+	e := l.Front()
+	for i := 0; i < r; i, e = i+1, e.Next() {
+		it, err = client.Next(context.Background(), &pb.NextRequest{IterKey: it.Key})
+		require.NoError(t, err)
+		require.NotNil(t, it)
+	}
+	return e, it
+}
+
+func TestInsert(t *testing.T) {
+	res, err := client.New(context.Background(), &pb.Empty{})
+	require.NoError(t, err)
+
+	l := list.New()
+
+	for i := 0; i < 100; i++ {
+		val := uint32(i + 1)
+
+		l.PushBack(val)
+
+		it, err := client.PushBack(context.Background(), &pb.PushRequest{ListKey: res.Key, PageId: val})
+		require.NoError(t, err)
+		require.NotNil(t, it)
+	}
+
+	for i := 0; i < 100; i++ {
+		val := uint32(i + 1)
+
+		e, it := RandIter(t, l, res.Key)
+
+		l.InsertBefore(val, e)
+
+		it, err = client.Insert(context.Background(), &pb.InsertRequest{IterKey: it.Key, PageId: val})
+		require.NoError(t, err)
+		require.NotNil(t, it)
+	}
+
+	CompareList(t, l, res.Key)
 }
