@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func buildRespone(article interface{}, nextPageKey string) fiber.Map {
+func buildResponse(article interface{}, nextPageKey string) fiber.Map {
 	if article == nil {
 		return fiber.Map{
 			"nextPageKey": nextPageKey,
@@ -39,7 +39,7 @@ func GetHead() func(c *fiber.Ctx) error {
 			err := fmt.Errorf("failed to get page")
 			return fiber.NewError(fiber.StatusNotFound, err.Error())
 		}
-		response := buildRespone(nil, pageNode.Key.String())
+		response := buildResponse(nil, pageNode.Key.String())
 		return c.Status(fiber.StatusOK).JSON(response)
 	}
 }
@@ -66,7 +66,7 @@ func GetPage() func(c *fiber.Ctx) error {
 			err := fmt.Errorf("failed to get page")
 			return fiber.NewError(fiber.StatusNotFound, err.Error())
 		}
-		response := buildRespone(article, pageNode.NextKey.String())
+		response := buildResponse(article, pageNode.NextKey.String())
 		return c.Status(fiber.StatusOK).JSON(response)
 	}
 }
