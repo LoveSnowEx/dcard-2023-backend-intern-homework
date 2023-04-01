@@ -55,7 +55,7 @@ func Connect() (*DB, error) {
 			log.New(os.Stdout, "\n", log.LstdFlags),
 			logger.Config{
 				SlowThreshold: time.Second,
-				LogLevel:      logger.Info,
+				LogLevel:      logger.Warn,
 				Colorful:      true,
 			},
 		),
