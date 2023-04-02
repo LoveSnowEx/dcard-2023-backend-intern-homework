@@ -1,12 +1,10 @@
 # dcard-2023-backend-intern-homework
 
-這是一個使用 Go 語言實現的後端應用程式，提供 REST API 和 gRPC API 給使用者進行操作。  
-REST API 提供給一般使用者進行操作，而 gRPC API 提供給鏈結串列的編輯者進行操作。  
-每個鏈結串列的元素紀錄了一個頁面（Page）的 ID。
+這是一個使用 Go 語言實現的後端應用程式，為使用者提供 RESTful API 和 gRPC API 進行操作。其中，RESTful API 針對一般使用者操作，而 gRPC API 則針對鏈結串列的編輯者進行操作。每個鏈結串列的元素都記錄了一個頁面（Page）的 ID。
 
 ## 設計
 
-- 提供 REST API 給串列的使用者，讓使用者可以透過 key 獲取每一篇頁面的資訊
+- 提供 RESTful API 給串列的使用者，讓使用者可以透過 key 獲取每一篇頁面的資訊
   - GET `/head/<listkey>` 可獲得 {nextPageKey: xxx}
   - GET `/page/<pagekey>` 可獲得 {article: {title: aaa, content: bbb, ...}, nextPageKey: xxx}
 - 提供 gRPC API 給鏈結串列的編輯者進行操作
@@ -22,6 +20,11 @@ REST API 提供給一般使用者進行操作，而 gRPC API 提供給鏈結串�
   - PopBack: 移除串列尾部的元素
   - PushFront: 串列首部新增一個元素
   - PopFront: 移除串列首部的元素
+  - Clone: 複製一個串列
+
+> 原本有打算製作 gRPC Bidirectional Streaming 的設計，並已經做過小規模測試，但是因為時間關係，所以沒有將實作加入本系統。
+
+透過上述的 API，使用者可以獲取自己的列表，使用 RESTful API 可以取得頁面的資訊以及下一個頁面的 key。此外，ML 和後端工程師也能夠專注於列表的製作，使用 gRPC API 來進行各種操作。
 
 ## 環境需求
 
@@ -49,7 +52,7 @@ go build
 ./dcard-2023-backend-intern-homework
 ```
 
-- REST API 預設會在 port `:3000` 提供服務
+- RESTful API 預設會在 port `:3000` 提供服務
 - gRPC API 預設會在 port `:50051` 提供服務。
 - 另外 gRPC 有 UI 可以使用，預設在 port `:8080`。
 
@@ -59,11 +62,13 @@ go build
 go test ./...
 ```
 
+我使用 `stretchr/testify` 和 `container/list` 來實現測試，透過比對 `list` 中的資料和資料庫中的資料是否相同，以確認操作是否正確。為了方便測試，我將資料庫換成了 SQLite，因為 SQLite 可以直接運行，不需要額外的設定，而且可以在測試結束後自動清除資料。
+
 ### 自定義設定
 
 可以透過修改 `.env` 檔案來自定義設定。`.env.example` 是範例檔案。
 
-## REST API
+## RESTful API
 
 ### GET `/head/<listkey>`
 
@@ -158,6 +163,10 @@ message PushRequest {
 }
 
 message PopRequest {
+  string list_key = 1;
+}
+
+message CloneRequest {
   string list_key = 1;
 }
 ```
@@ -276,7 +285,17 @@ rpc PushFront(PushRequest) returns (PageIterator) {}
 rpc PopFront(PopRequest) returns (Empty) {}
 ```
 
+#### Clone
+
+複製一個串列。
+
+```protobuf
+rpc Clone(CloneRequest) returns (PageList) {}
+```
+
 ## 資料庫設計
+
+我使用 PostgreSQL 作為資料庫，透過 GORM 套件進行操作。我選擇使用 PostgreSQL 是因為透過 Docker 運行資料庫非常方便，且無需額外安裝環境。此外，使用 PgAdmin 進行管理，也讓我感到更親切。而 GORM 則是一個 ORM 套件，未來更換資料庫時只需要調整 GORM 的設定即可，無需修改太多程式碼。
 
 ### 鏈結串列
 
@@ -297,7 +316,7 @@ type PageNode struct {
     // Page   *page.Page `gorm:"foreignkey:PageID;references:ID"`
     PageID  uint
     List    PageList  `gorm:"foreignkey:ListKey;references:Key"`
-    ListKey uuid.UUID `gorm:"type:uuid"`
+    ListKey uuid.UUID `gorm:"type:uuid;index"`
 }
 ```
 
