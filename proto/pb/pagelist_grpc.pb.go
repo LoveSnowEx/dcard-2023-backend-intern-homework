@@ -33,6 +33,7 @@ const (
 	PageListService_PopBack_FullMethodName   = "/pagelist.PageListService/PopBack"
 	PageListService_PushFront_FullMethodName = "/pagelist.PageListService/PushFront"
 	PageListService_PopFront_FullMethodName  = "/pagelist.PageListService/PopFront"
+	PageListService_Clone_FullMethodName     = "/pagelist.PageListService/Clone"
 )
 
 // PageListServiceClient is the client API for PageListService service.
@@ -53,6 +54,7 @@ type PageListServiceClient interface {
 	PopBack(ctx context.Context, in *PopRequest, opts ...grpc.CallOption) (*Empty, error)
 	PushFront(ctx context.Context, in *PushRequest, opts ...grpc.CallOption) (*PageIterator, error)
 	PopFront(ctx context.Context, in *PopRequest, opts ...grpc.CallOption) (*Empty, error)
+	Clone(ctx context.Context, in *CloneRequest, opts ...grpc.CallOption) (*PageList, error)
 }
 
 type pageListServiceClient struct {
@@ -189,6 +191,15 @@ func (c *pageListServiceClient) PopFront(ctx context.Context, in *PopRequest, op
 	return out, nil
 }
 
+func (c *pageListServiceClient) Clone(ctx context.Context, in *CloneRequest, opts ...grpc.CallOption) (*PageList, error) {
+	out := new(PageList)
+	err := c.cc.Invoke(ctx, PageListService_Clone_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PageListServiceServer is the server API for PageListService service.
 // All implementations must embed UnimplementedPageListServiceServer
 // for forward compatibility
@@ -207,6 +218,7 @@ type PageListServiceServer interface {
 	PopBack(context.Context, *PopRequest) (*Empty, error)
 	PushFront(context.Context, *PushRequest) (*PageIterator, error)
 	PopFront(context.Context, *PopRequest) (*Empty, error)
+	Clone(context.Context, *CloneRequest) (*PageList, error)
 	mustEmbedUnimplementedPageListServiceServer()
 }
 
@@ -255,6 +267,9 @@ func (UnimplementedPageListServiceServer) PushFront(context.Context, *PushReques
 }
 func (UnimplementedPageListServiceServer) PopFront(context.Context, *PopRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PopFront not implemented")
+}
+func (UnimplementedPageListServiceServer) Clone(context.Context, *CloneRequest) (*PageList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Clone not implemented")
 }
 func (UnimplementedPageListServiceServer) mustEmbedUnimplementedPageListServiceServer() {}
 
@@ -521,6 +536,24 @@ func _PageListService_PopFront_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PageListService_Clone_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CloneRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PageListServiceServer).Clone(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PageListService_Clone_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PageListServiceServer).Clone(ctx, req.(*CloneRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PageListService_ServiceDesc is the grpc.ServiceDesc for PageListService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -583,6 +616,10 @@ var PageListService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "PopFront",
 			Handler:    _PageListService_PopFront_Handler,
+		},
+		{
+			MethodName: "Clone",
+			Handler:    _PageListService_Clone_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

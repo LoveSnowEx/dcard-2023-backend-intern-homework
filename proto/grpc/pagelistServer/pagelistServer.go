@@ -235,3 +235,19 @@ func (s *Server) PopFront(ctx context.Context, req *pb.PopRequest) (*pb.Empty, e
 	}
 	return &pb.Empty{}, nil
 }
+
+func (s *Server) Clone(ctx context.Context, req *pb.CloneRequest) (*pb.PageList, error) {
+	dbConn, err := db.Connect()
+	if err != nil {
+		log.Fatalf("failed to connect db: %v", err)
+	}
+	u, err := uuid.Parse(req.ListKey)
+	if err != nil {
+		return nil, fmt.Errorf("invalid key: %s", req.ListKey)
+	}
+	list, err := dbConn.ClonePageList(u)
+	if err != nil {
+		return nil, fmt.Errorf("failed to clone: %v", err)
+	}
+	return &pb.PageList{Key: list.Key.String()}, nil
+}

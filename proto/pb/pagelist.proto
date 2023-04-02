@@ -71,6 +71,10 @@ message PopRequest {
   string list_key = 1;
 }
 
+message CloneRequest {
+  string list_key = 1;
+}
+
 service PageListService {
   rpc New(Empty) returns (PageList) {}
   rpc Delete(DeleteRequest) returns (Empty) {}
@@ -86,4 +90,5 @@ service PageListService {
   rpc PopBack(PopRequest) returns (Empty) {}
   rpc PushFront(PushRequest) returns (PageIterator) {}
   rpc PopFront(PopRequest) returns (Empty) {}
+  rpc Clone(CloneRequest) returns (PageList) {}
 }
