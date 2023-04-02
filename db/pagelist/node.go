@@ -17,7 +17,7 @@ type PageNode struct {
 	// Page   *page.Page `gorm:"foreignkey:PageID;references:ID"`
 	PageID  uint
 	List    PageList  `gorm:"foreignkey:ListKey;references:Key"`
-	ListKey uuid.UUID `gorm:"type:uuid"`
+	ListKey uuid.UUID `gorm:"type:uuid;index"`
 }
 
 func (n *PageNode) BeforeCreate(tx *gorm.DB) error {
