@@ -53,13 +53,20 @@ func (db *DB) ClonePageList(key uuid.UUID) (*pl.PageList, error) {
 		return nil, err
 	}
 	newList := pl.New()
-	db.CreatePageList(newList)
-	nodes, err := db.GetPageNodesByListKeySorted(list.Key)
-
+	err = db.CreatePageList(newList)
 	if err != nil {
 		return nil, fmt.Errorf("clone page list: %v", err)
 	}
+
+	nodes, err := db.GetPageNodesByListKeySorted(list.Key)
+	if err != nil {
+		return nil, fmt.Errorf("clone page list: %v", err)
+	}
+
 	for i := range nodes {
+		if nodes[i].End {
+			break
+		}
 		_, err = db.PushBackPageList(newList.Key, nodes[i].PageID)
 		if err != nil {
 			return nil, fmt.Errorf("clone page list: %v", err)
@@ -99,7 +106,7 @@ func (db *DB) GetPageNodeByKey(key uuid.UUID) (*pl.PageNode, error) {
 // Retrieve page nodes by list key
 func (db *DB) GetPageNodesByListKey(key uuid.UUID) ([]pl.PageNode, error) {
 	var nodes []pl.PageNode
-	err := db.DB.Find(&nodes, "\"key\" = ?", key).Error
+	err := db.DB.Find(&nodes, "\"list_key\" = ?", key).Error
 	if err != nil {
 		return nil, fmt.Errorf("get page nodes by list key: %v", err)
 	}
