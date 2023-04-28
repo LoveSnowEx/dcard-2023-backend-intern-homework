@@ -1,4 +1,4 @@
-# dcard-2023-backend-intern-homework
+# page-list-grpc-service
 
 這是一個使用 Go 語言實現的後端應用程式，為使用者提供 RESTful API 和 gRPC API 進行操作。其中，RESTful API 針對一般使用者操作，而 gRPC API 則針對鏈結串列的編輯者進行操作。每個鏈結串列的元素都記錄了一個頁面（Page）的 ID。
 
