@@ -1,4 +1,4 @@
-FROM golang:1.20-alpine
+FROM golang:1.20-alpine AS builder
 
 WORKDIR /app
 
@@ -9,4 +9,10 @@ COPY . .
 
 RUN go build -o ./tmp/main .
 
-CMD ["./tmp/main"]
+FROM caddy:2.6.4
+
+COPY --from=builder /app/tmp/main ./main
+
+COPY Caddyfile /etc/caddy/Caddyfile
+
+CMD ["sh", "-c", "caddy run --config /etc/caddy/Caddyfile & ./main"]

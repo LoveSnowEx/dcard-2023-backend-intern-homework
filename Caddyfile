@@ -1,0 +1,11 @@
+{$HOST}:{$PORT} {
+	handle_path /api/* {
+        reverse_proxy localhost:{$FIBER_PORT}
+    }
+	handle_path /grpc/* {
+		reverse_proxy localhost:{$GRPC_PORT}
+	}
+	handle {
+		reverse_proxy localhost:{$GRPCUI_PORT}
+	}
+}
