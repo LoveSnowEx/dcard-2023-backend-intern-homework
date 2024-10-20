@@ -19,7 +19,7 @@ func MockConnet() (*DB, error) {
 	}
 
 	// Open connection
-	conn, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{
+	conn, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{
 		Logger: logger.New(
 			log.New(os.Stdout, "\n", log.LstdFlags),
 			logger.Config{
@@ -39,26 +39,4 @@ func MockConnet() (*DB, error) {
 	db = &DB{DB: conn}
 
 	return db, nil
-}
-
-func MockClose() error {
-	if db == nil {
-		return nil
-	}
-
-	dbConn, err := db.DB.DB()
-	if err != nil {
-		return fmt.Errorf("failed to close database connection: %w", err)
-	}
-
-	err = dbConn.Close()
-	if err != nil {
-		return fmt.Errorf("failed to close database connection: %w", err)
-	}
-
-	db = nil
-
-	os.Remove("test.db")
-
-	return nil
 }

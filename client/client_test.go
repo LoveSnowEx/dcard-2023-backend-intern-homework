@@ -24,7 +24,7 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatalf("failed to connect db: %v", err)
 	}
-	defer db.MockClose()
+	defer db.Close()
 
 	go func() {
 		err := service.RunGrpc(":50051")
