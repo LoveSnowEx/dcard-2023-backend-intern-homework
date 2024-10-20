@@ -8,29 +8,42 @@
 
 > 專案想法參考了這篇[文章](https://medium.com/dcardlab/de07f45295f6)
 
-## API 設計
+## 介紹
 
-可以使用 RESTful API 和 gRPC API 進行操作。RESTful API 提供使用者進行查詢、gRPC API 則提供管理者進行編輯。
+- 包含 RESTful API、gRPC API 及 GUI。
 
-- 提供 RESTful API 給串列的使用者，讓使用者可以透過 key 獲取每一篇文章的資訊
-  - GET `/head/<listkey>` 可獲得 {nextPageKey: xxx}
-  - GET `/page/<pagekey>` 可獲得 {article: {title: aaa, content: bbb, ...}, nextPageKey: xxx}
-- 提供 gRPC API 給鏈結串列的管理者進行操作
-  - New: 建立一個新的串列
-  - Delete: 刪除一個串列
-  - Begin: 獲取第一個元素的 Iterator
-  - End: 獲取最後一個元素之後的 Iterator
-  - Clear: 清空串列
-  - Insert: 於該 Iterator 之前插入新的元素
-  - Erase: 移除該 Iterator
-  - Set: 設定該 Iterator 儲存的 Page ID
-  - PushBack: 串列尾部新增一個元素
-  - PopBack: 移除串列尾部的元素
-  - PushFront: 串列首部新增一個元素
-  - PopFront: 移除串列首部的元素
-  - Clone: 複製一個串列
+### RESTful API
+
+RESTful API 讓使用者可以透過 key 獲取列表及每一篇文章的資訊：
+
+- `GET /head/<listkey>` 可獲得文章列表中第一篇文章的 key
+- `GET /page/<pagekey>` 可獲得文章資訊及下一篇文章的 key
+
+### GRPC API
+
+gRPC API 提供管理者對列表進行編輯：
+
+- New: 建立一個新的列表
+- Delete: 刪除一個列表
+- Begin: 獲取第一個元素的 Iterator
+- End: 獲取最後一個元素之後的 Iterator
+- Clear: 清空列表
+- Insert: 於該 Iterator 之前插入新的元素
+- Erase: 移除該 Iterator
+- Set: 設定該 Iterator 儲存的 Page ID
+- PushBack: 列表尾部新增一個元素
+- PopBack: 移除列表尾部的元素
+- PushFront: 列表首部新增一個元素
+- PopFront: 移除列表首部的元素
+- Clone: 複製一個列表
 
 > TODO: 這部分可以使用 gRPC Bidirectional Streaming 進行優化，讓編輯操作的效率更高。
+
+## GUI
+
+可以用來測試 gRPC API，對文章列表進行編輯。
+
+![grpcui](image/grpcui.png)
 
 ## 環境需求
 
@@ -38,47 +51,33 @@
 
 ## 如何使用
 
-### 執行資料庫
+### 1. 初始化 env
 
-在執行伺服器之前，需要先執行資料庫，這裡使用的是 PostgreSQL，可以使用 Docker Compose 來執行。
+請參考 `.env.example` 以對 `.env` 進行設定。
+
+### 2. 啟動服務
+
+執行以下指令以啟動所有服務：
 
 ```bash
 docker-compose up -d
 ```
 
-### 編譯伺服器
+### 3. 服務端口
 
-```bash
-go build
-```
+| service | port |
+| --- | --- |
+| RESTful API | 3000 |
+| gRPC API | 50051 |
+| GUI | 8080 |
 
-### 執行伺服器
+## API 文件
 
-```bash
-./dcard-2023-backend-intern-homework
-```
+### RESTful
 
-- RESTful API 預設會在 port `:3000` 提供服務
-- gRPC API 預設會在 port `:50051` 提供服務。
-- 另外 gRPC 有 UI 可以使用，預設在 port `:8080`。
+#### GET `/head/<listkey>`
 
-### 測試
-
-```bash
-go test ./...
-```
-
-使用 `stretchr/testify` 和 `container/list` 來實現測試，透過比對 `list` 中的資料和資料庫中的資料是否相同，以確認操作是否正確。同時使用 in-memory sqlite 作為測試資料庫，以確保測試的可靠性。
-
-### 設定
-
-參考 `.env.example` 以對 `.env` 進行設定。
-
-## RESTful API
-
-### GET `/head/<listkey>`
-
-獲得串列的第一個元素的資訊，包含第一個元素的 key。
+獲得列表的第一個元素的資訊，包含第一個元素的 key。
 
 Response:
 
@@ -88,7 +87,7 @@ Response:
 }
 ```
 
-### GET `/page/<pagekey>`
+#### GET `/page/<pagekey>`
 
 獲得文章的資訊，包含文章的標題、內容、網址 slug、是否發佈等等。
 
@@ -106,9 +105,9 @@ Response:
 }
 ```
 
-## gRPC API
+### gRPC
 
-### Message
+#### Message
 
 ```protobuf
 message Empty {
@@ -176,25 +175,25 @@ message CloneRequest {
 }
 ```
 
-### Service
+#### Service
 
-#### New
+##### New
 
-建立一個新的串列。
+建立一個新的列表。
 
 ```protobuf
 rpc New(Empty) returns (PageList) {}
 ```
 
-#### Delete
+##### Delete
 
-刪除一個串列。
+刪除一個列表。
 
 ```protobuf
 rpc Delete(DeleteRequest) returns (Empty) {}
 ```
 
-#### Begin
+##### Begin
 
 獲取第一個元素的 Iterator。
 
@@ -202,7 +201,7 @@ rpc Delete(DeleteRequest) returns (Empty) {}
 rpc Begin(BeginRequest) returns (PageIterator) {}
 ```
 
-#### End
+##### End
 
 獲取最後一個元素之後的 Iterator。
 
@@ -210,7 +209,7 @@ rpc Begin(BeginRequest) returns (PageIterator) {}
 rpc End(EndRequest) returns (PageIterator) {}
 ```
 
-#### Next
+##### Next
 
 獲取下一個元素的 Iterator。
 
@@ -218,7 +217,7 @@ rpc End(EndRequest) returns (PageIterator) {}
 rpc Next(NextRequest) returns (PageIterator) {}
 ```
 
-#### Prev
+##### Prev
 
 獲取上一個元素的 Iterator。
 
@@ -226,15 +225,15 @@ rpc Next(NextRequest) returns (PageIterator) {}
 rpc Prev(PrevRequest) returns (PageIterator) {}
 ```
 
-#### Clear
+##### Clear
 
-清空串列。
+清空列表。
 
 ```protobuf
   rpc Clear(ClearRequest) returns (Empty) {}
 ```
 
-#### Insert
+##### Insert
 
 於該 Iterator 之前插入新的元素。
 
@@ -242,7 +241,7 @@ rpc Prev(PrevRequest) returns (PageIterator) {}
 rpc Insert(InsertRequest) returns (PageIterator) {}
 ```
 
-#### Erase
+##### Erase
 
 移除該 Iterator。
 
@@ -250,7 +249,7 @@ rpc Insert(InsertRequest) returns (PageIterator) {}
 rpc Erase(EraseRequest) returns (PageIterator) {}
 ```
 
-#### Set
+##### Set
 
 設定該 Iterator 儲存的 Page ID。
 
@@ -258,47 +257,47 @@ rpc Erase(EraseRequest) returns (PageIterator) {}
 rpc Set(SetRequest) returns (PageIterator) {}
 ```
 
-#### PushBack
+##### PushBack
 
-串列尾部新增一個元素。
+列表尾部新增一個元素。
 
 ```protobuf
 rpc PushBack(PushRequest) returns (PageIterator) {}
 ```
 
-#### PopBack
+##### PopBack
 
-移除串列尾部的元素。
+移除列表尾部的元素。
 
 ```protobuf
 rpc PopBack(PopRequest) returns (Empty) {}
 ```
 
-#### PushFront
+##### PushFront
 
-串列首部新增一個元素。
+列表首部新增一個元素。
 
 ```protobuf
 rpc PushFront(PushRequest) returns (PageIterator) {}
 ```
 
-#### PopFront
+##### PopFront
 
-移除串列首部的元素。
+移除列表首部的元素。
 
 ```protobuf
 rpc PopFront(PopRequest) returns (Empty) {}
 ```
 
-#### Clone
+##### Clone
 
-複製一個串列。
+複製一個列表。
 
 ```protobuf
 rpc Clone(CloneRequest) returns (PageList) {}
 ```
 
-## 資料庫設計
+## 資料庫
 
 使用 PostgreSQL 作為資料庫，並透過 GORM 套件進行操作。
 
@@ -338,4 +337,12 @@ type Page struct {
 }
 ```
 
-這邊只有簡單的紀錄了文章的標題、內容、網址 slug 和發佈狀態。
+`Page` 紀錄了文章的資訊，包含標題、內容、網址 slug 和發佈狀態。
+
+## 測試
+
+```bash
+go test ./...
+```
+
+使用 `stretchr/testify` 和 `container/list` 套件來實現測試，透過比對 `list` 中的資料和資料庫中的資料是否相同，以確認操作是否正確。同時使用 in-memory sqlite 作為測試資料庫，以確保測試的可靠性。
