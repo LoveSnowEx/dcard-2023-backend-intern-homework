@@ -1,4 +1,4 @@
-{$HOST}:{$PORT} {
+:{$PORT} {
 	handle_path /api/* {
         reverse_proxy localhost:{$FIBER_PORT}
     }
