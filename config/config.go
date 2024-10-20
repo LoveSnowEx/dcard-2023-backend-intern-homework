@@ -8,9 +8,9 @@ import (
 	"github.com/spf13/viper"
 )
 
-var Default = Config{
+var config = Config{
 	TimeZone:   "Asia/Taipei",
-	DBHost:     "localhost",
+	DBHost:     "postgres",
 	DBPort:     "5432",
 	DBUser:     "postgres",
 	DBPassword: "password",
@@ -51,18 +51,13 @@ func Get() Config {
 	err := viper.ReadInConfig()
 	if err != nil {
 		log.Printf("failed to read config: %v", err)
-		return Default
+		return config
 	}
 
-	return Config{
-		TimeZone:   viper.GetString("TZ"),
-		DBHost:     viper.GetString("DB_HOST"),
-		DBPort:     viper.GetString("DB_PORT"),
-		DBUser:     viper.GetString("DB_USER"),
-		DBPassword: viper.GetString("DB_PASSWORD"),
-		DBName:     viper.GetString("DB_NAME"),
-		FiberPort:  viper.GetString("FIBER_PORT"),
-		GrpcPort:   viper.GetString("GRPC_PORT"),
-		GrpcuiPort: viper.GetString("GRPCUI_PORT"),
-	}
+	config.TimeZone = viper.GetString("TZ")
+	config.DBUser = viper.GetString("DB_USER")
+	config.DBPassword = viper.GetString("DB_PASSWORD")
+	config.DBName = viper.GetString("DB_NAME")
+
+	return config
 }

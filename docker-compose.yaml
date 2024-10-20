@@ -1,6 +1,14 @@
-version: '3'
 services:
-  db:
+  app:
+    build: .
+    restart: always
+    volumes:
+      - .:/app
+    ports:
+      - "${FIBER_PORT}:3000"
+      - "${GRPC_PORT}:50051"
+      - "${GRPCUI_PORT}:8080"
+  postgres:
     image: postgres
     restart: always
     environment:
@@ -8,8 +16,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     volumes:
-      - /var/lib/dcard-2023-backend-intern-homework/postgresql/data:/var/lib/postgresql/data
-    ports:
-      - "${DB_PORT}:5432"
-    env_file:
-      - .env
+      - data:/var/lib/postgresql/data
+
+volumes:
+  data:
