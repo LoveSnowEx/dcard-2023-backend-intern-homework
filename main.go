@@ -11,6 +11,7 @@ import (
 	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/config"
 	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/db"
 	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/db/page"
+	"github.com/LoveSnowEx/dcard-2023-backend-intern-homework/internal/service"
 )
 
 func randomString(n int) string {
@@ -77,18 +78,18 @@ func main() {
 		fmt.Println(sig)
 		done <- struct{}{}
 	}()
-	// go func() {
-	// 	log.Fatalln(service.RunFiber(":" + conf.FiberPort))
-	// 	done <- struct{}{}
-	// }()
-	// go func() {
-	// 	log.Fatalln(service.RunGrpc(":" + conf.GrpcPort))
-	// 	done <- struct{}{}
-	// }()
-	// go func() {
-	// 	log.Fatalln(service.RunGrpcui(":"+conf.GrpcuiPort, ":"+conf.GrpcPort))
-	// 	done <- struct{}{}
-	// }()
+	go func() {
+		log.Fatalln(service.RunFiber(":" + conf.FiberPort))
+		done <- struct{}{}
+	}()
+	go func() {
+		log.Fatalln(service.RunGrpc(":" + conf.GrpcPort))
+		done <- struct{}{}
+	}()
+	go func() {
+		log.Fatalln(service.RunGrpcui(":"+conf.GrpcuiPort, ":"+conf.GrpcPort))
+		done <- struct{}{}
+	}()
 
 	fmt.Println("waiting for Ctrl+C signal")
 
