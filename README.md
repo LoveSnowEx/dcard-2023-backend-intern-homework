@@ -1,13 +1,21 @@
-# page-list-grpc-service
+# page-list-service
 
-這是一個使用 Go 語言實現的後端應用程式，為使用者提供 RESTful API 和 gRPC API 進行操作。其中，RESTful API 針對一般使用者操作，而 gRPC API 則針對鏈結串列的編輯者進行操作。每個鏈結串列的元素都記錄了一個頁面（Page）的 ID。
+這是一個使用 Go 語言實現的後端服務，提供了文章列表查詢和編輯的功能。
 
-## 設計
+## 特色
 
-- 提供 RESTful API 給串列的使用者，讓使用者可以透過 key 獲取每一篇頁面的資訊
+本專案使用鏈結串列（Linked List）結構來管理文章列表。每個節點代表一篇文章（Page），使用者可以逐篇獲取文章，而不用一次載入整個列表。這種設計優化了查詢效率，能有效應對大量使用者的同時操作，從而增強系統的負載能力。而對於管理者，也提供了豐富的編輯操作，可以方便地進行列表的編輯，無需擔心分頁工程的問題。
+
+> 專案想法參考了這篇[文章](https://medium.com/dcardlab/de07f45295f6)
+
+## API 設計
+
+可以使用 RESTful API 和 gRPC API 進行操作。RESTful API 提供使用者進行查詢、gRPC API 則提供管理者進行編輯。
+
+- 提供 RESTful API 給串列的使用者，讓使用者可以透過 key 獲取每一篇文章的資訊
   - GET `/head/<listkey>` 可獲得 {nextPageKey: xxx}
   - GET `/page/<pagekey>` 可獲得 {article: {title: aaa, content: bbb, ...}, nextPageKey: xxx}
-- 提供 gRPC API 給鏈結串列的編輯者進行操作
+- 提供 gRPC API 給鏈結串列的管理者進行操作
   - New: 建立一個新的串列
   - Delete: 刪除一個串列
   - Begin: 獲取第一個元素的 Iterator
@@ -22,9 +30,7 @@
   - PopFront: 移除串列首部的元素
   - Clone: 複製一個串列
 
-> 原本有打算製作 gRPC Bidirectional Streaming 的設計，並已經做過小規模測試，但是因為時間關係，所以沒有將實作加入本系統。
-
-透過上述的 API，使用者可以獲取自己的列表，使用 RESTful API 可以取得頁面的資訊以及下一個頁面的 key。此外，ML 和後端工程師也能夠專注於列表的製作，使用 gRPC API 來進行各種操作。
+> TODO: 這部分可以使用 gRPC Bidirectional Streaming 進行優化，讓編輯操作的效率更高。
 
 ## 環境需求
 
@@ -62,11 +68,11 @@ go build
 go test ./...
 ```
 
-我使用 `stretchr/testify` 和 `container/list` 來實現測試，透過比對 `list` 中的資料和資料庫中的資料是否相同，以確認操作是否正確。為了方便測試，我將資料庫換成了 SQLite，因為 SQLite 可以直接運行，不需要額外的設定，而且可以在測試結束後自動清除資料。
+使用 `stretchr/testify` 和 `container/list` 來實現測試，透過比對 `list` 中的資料和資料庫中的資料是否相同，以確認操作是否正確。同時使用 in-memory sqlite 作為測試資料庫，以確保測試的可靠性。
 
-### 自定義設定
+### 設定
 
-可以透過修改 `.env` 檔案來自定義設定。`.env.example` 是範例檔案。
+參考 `.env.example` 以對 `.env` 進行設定。
 
 ## RESTful API
 
@@ -84,7 +90,7 @@ Response:
 
 ### GET `/page/<pagekey>`
 
-獲得頁面的資訊，包含頁面的標題、內容、網址 slug、是否發佈等等。
+獲得文章的資訊，包含文章的標題、內容、網址 slug、是否發佈等等。
 
 Response:
 
@@ -141,7 +147,6 @@ message PrevRequest {
 message ClearRequest {
   string list_key = 1;
 }
-
 
 message InsertRequest {
   string iter_key = 1;
@@ -295,11 +300,9 @@ rpc Clone(CloneRequest) returns (PageList) {}
 
 ## 資料庫設計
 
-我使用 PostgreSQL 作為資料庫，透過 GORM 套件進行操作。我選擇使用 PostgreSQL 是因為透過 Docker 運行資料庫非常方便，且無需額外安裝環境。此外，使用 PgAdmin 進行管理，也讓我感到更親切。而 GORM 則是一個 ORM 套件，未來更換資料庫時只需要調整 GORM 的設定即可，無需修改太多程式碼。
+使用 PostgreSQL 作為資料庫，並透過 GORM 套件進行操作。
 
-### 鏈結串列
-
-鏈結串列的資料結構如下：
+### 文章列表
 
 ```go
 type PageList struct {
@@ -313,20 +316,17 @@ type PageNode struct {
     Key     uuid.UUID `gorm:"type:uuid;uniqueIndex"`
     PrevKey uuid.UUID `gorm:"type:uuid"`
     NextKey uuid.UUID `gorm:"type:uuid"`
-    // Page   *page.Page `gorm:"foreignkey:PageID;references:ID"`
+    Page   *page.Page `gorm:"foreignkey:PageID;references:ID"`
     PageID  uint
     List    PageList  `gorm:"foreignkey:ListKey;references:Key"`
     ListKey uuid.UUID `gorm:"type:uuid;index"`
 }
 ```
 
-文章的資訊儲存在 `Page` 資料表中，而 `PageNode` 則是紀錄了鏈結串列的資訊，包含了頁面的 ID、頁面的前後頁面的 key、頁面所屬的串列的 key。
-
-> 將 `Page` 註解掉的原因是因為 `Page` 相關的功能沒有實作，目前只有範例的 `Page` 資料表。
+- `PageList`：文章列表，只記錄紀錄了該文章列表的 key。
+- `PageNode`：文章列表節點，紀錄了文章列表中的每一篇文章，包含了上一篇文章的 key、下一篇文章的 key、所屬列表的 key 以及對應的文章 ID。
 
 ### 文章
-
-文章的資料結構如下：
 
 ```go
 type Page struct {
@@ -338,4 +338,4 @@ type Page struct {
 }
 ```
 
-這邊只有簡單的紀錄了文章的標題、內容、網址 slug 和是否發佈。
+這邊只有簡單的紀錄了文章的標題、內容、網址 slug 和發佈狀態。
