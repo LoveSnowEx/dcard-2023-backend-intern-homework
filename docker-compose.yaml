@@ -5,9 +5,9 @@ services:
     volumes:
       - .:/app
     ports:
-      - "${FIBER_PORT}:3000"
-      - "${GRPC_PORT}:50051"
-      - "${GRPCUI_PORT}:8080"
+      - ${FIBER_PORT}:${FIBER_PORT}
+      - ${GRPC_PORT}:${GRPC_PORT}
+      - ${GRPCUI_PORT}:${GRPCUI_PORT}
   postgres:
     image: postgres
     restart: always

@@ -2,23 +2,11 @@ package config
 
 import (
 	"log"
-	"path/filepath"
-	"runtime"
 
 	"github.com/spf13/viper"
 )
 
-var config = Config{
-	TimeZone:   "Asia/Taipei",
-	DBHost:     "postgres",
-	DBPort:     "5432",
-	DBUser:     "postgres",
-	DBPassword: "password",
-	DBName:     "postgres",
-	FiberPort:  "3000",
-	GrpcPort:   "50051",
-	GrpcuiPort: "8080",
-}
+var config Config
 
 type Config struct {
 	TimeZone   string
@@ -32,19 +20,18 @@ type Config struct {
 	GrpcuiPort string
 }
 
-func getCurrentPath() string {
-	_, filename, _, _ := runtime.Caller(1)
-
-	return filepath.Dir(filename)
-}
-
 func init() {
-	cwd := getCurrentPath()
-	rootwd := filepath.Join(cwd, "..")
+	viper.SetConfigFile(".env")
 
-	viper.AddConfigPath(rootwd)
-	viper.SetConfigType("env")
-	viper.SetConfigName(".env")
+	viper.SetDefault("TZ", "Asia/Taipei")
+	viper.SetDefault("DB_HOST", "postgres")
+	viper.SetDefault("DB_PORT", "5432")
+	viper.SetDefault("DB_USER", "postgres")
+	viper.SetDefault("DB_PASSWORD", "password")
+	viper.SetDefault("DB_NAME", "postgres")
+	viper.SetDefault("FIBER_PORT", "3000")
+	viper.SetDefault("GRPC_PORT", "50051")
+	viper.SetDefault("GRPCUI_PORT", "8080")
 }
 
 func Get() Config {
@@ -58,6 +45,11 @@ func Get() Config {
 	config.DBUser = viper.GetString("DB_USER")
 	config.DBPassword = viper.GetString("DB_PASSWORD")
 	config.DBName = viper.GetString("DB_NAME")
+	config.DBHost = viper.GetString("DB_HOST")
+	config.DBPort = viper.GetString("DB_PORT")
+	config.FiberPort = viper.GetString("FIBER_PORT")
+	config.GrpcPort = viper.GetString("GRPC_PORT")
+	config.GrpcuiPort = viper.GetString("GRPCUI_PORT")
 
 	return config
 }
