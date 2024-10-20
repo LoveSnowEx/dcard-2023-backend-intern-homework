@@ -20,6 +20,7 @@ func RunFiber(addr string) error {
 	app := fiber.New()
 	router.Setup(app)
 
+	log.Println("Fiber server is running on port", addr)
 	return app.Listen(addr)
 }
 
@@ -33,6 +34,7 @@ func RunGrpc(addr string) error {
 	reflection.Register(srv)
 	pb.RegisterPageListServiceServer(srv, &pagelistServer.Server{})
 
+	log.Println("GRPC server is running on port", addr)
 	return srv.Serve(lis)
 }
 
@@ -51,5 +53,7 @@ func RunGrpcui(addr, target string) error {
 	if err != nil {
 		return err
 	}
+
+	log.Println("GRPCUI server is running on port", addr)
 	return http.ListenAndServe(addr, h)
 }

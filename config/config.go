@@ -8,6 +8,7 @@ var config Config
 
 type Config struct {
 	TimeZone   string
+	DBDriver   string
 	DBHost     string
 	DBPort     string
 	DBUser     string
@@ -22,6 +23,7 @@ type Config struct {
 func init() {
 	viper.AutomaticEnv()
 	viper.SetDefault("TZ", "Asia/Taipei")
+	viper.SetDefault("DB_DRIVER", "postgres")
 	viper.SetDefault("DB_HOST", "postgres")
 	viper.SetDefault("DB_PORT", "5432")
 	viper.SetDefault("DB_USER", "postgres")
@@ -33,6 +35,7 @@ func init() {
 	viper.SetDefault("GRPCUI_PORT", "8080")
 
 	config.TimeZone = viper.GetString("TZ")
+	config.DBDriver = viper.GetString("DB_DRIVER")
 	config.DBUser = viper.GetString("DB_USER")
 	config.DBPassword = viper.GetString("DB_PASSWORD")
 	config.DBName = viper.GetString("DB_NAME")
