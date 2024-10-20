@@ -36,16 +36,18 @@ func Connect() (*DB, error) {
 	user := conf.DBUser
 	password := conf.DBPassword
 	dbname := conf.DBName
+	sslmode := conf.DBSSLMode
 	timezone := conf.TimeZone
 
 	// Build data source name
 	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=%s",
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=%s",
 		host,
 		user,
 		password,
 		dbname,
 		port,
+		sslmode,
 		timezone,
 	)
 
