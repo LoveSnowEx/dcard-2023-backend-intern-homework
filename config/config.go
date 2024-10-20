@@ -1,8 +1,6 @@
 package config
 
 import (
-	"log"
-
 	"github.com/spf13/viper"
 )
 
@@ -21,8 +19,7 @@ type Config struct {
 }
 
 func init() {
-	viper.SetConfigFile(".env")
-
+	viper.AutomaticEnv()
 	viper.SetDefault("TZ", "Asia/Taipei")
 	viper.SetDefault("DB_HOST", "postgres")
 	viper.SetDefault("DB_PORT", "5432")
@@ -32,14 +29,6 @@ func init() {
 	viper.SetDefault("FIBER_PORT", "3000")
 	viper.SetDefault("GRPC_PORT", "50051")
 	viper.SetDefault("GRPCUI_PORT", "8080")
-}
-
-func Get() Config {
-	err := viper.ReadInConfig()
-	if err != nil {
-		log.Printf("failed to read config: %v", err)
-		return config
-	}
 
 	config.TimeZone = viper.GetString("TZ")
 	config.DBUser = viper.GetString("DB_USER")
@@ -50,6 +39,8 @@ func Get() Config {
 	config.FiberPort = viper.GetString("FIBER_PORT")
 	config.GrpcPort = viper.GetString("GRPC_PORT")
 	config.GrpcuiPort = viper.GetString("GRPCUI_PORT")
+}
 
+func Get() Config {
 	return config
 }
