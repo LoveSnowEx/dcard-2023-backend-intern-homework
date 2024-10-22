@@ -17,4 +17,7 @@
 # Dotev files
 .env
 
+.DS_Store
+.vscode
+
 tmp
