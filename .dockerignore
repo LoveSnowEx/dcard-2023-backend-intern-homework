@@ -1,1 +1,16 @@
+.DS_Store
+.vscode
+
+.git
+.gitignore
+
 .env
+.env.example
+
+Dockerfile
+*.Dockerfile
+docker-compose.yml
+
+fly.toml
+
+tmp
