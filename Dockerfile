@@ -9,7 +9,7 @@ COPY . .
 
 RUN go build -o ./tmp/main .
 
-FROM caddy:2.6.4
+FROM caddy:2.8-alpine
 
 COPY --from=builder /app/tmp/main ./main
 
