@@ -32,7 +32,7 @@ func init() {
 	viper.SetDefault("DB_SSLMODE", "disable")
 	viper.SetDefault("FIBER_PORT", "3000")
 	viper.SetDefault("GRPC_PORT", "50051")
-	viper.SetDefault("GRPCUI_PORT", "8080")
+	viper.SetDefault("GRPCUI_PORT", "9000")
 
 	config.TimeZone = viper.GetString("TZ")
 	config.DBDriver = viper.GetString("DB_DRIVER")
