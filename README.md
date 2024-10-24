@@ -1,55 +1,48 @@
 # page-list-service
 
-這是一個使用 Go 語言實現的後端服務，提供了文章列表查詢和編輯的功能。
+這是一個使用 Go 語言實現的微服務，提供了文章列表查詢和編輯的功能。
 
-## 特色
+## 特色功能
 
-本專案使用鏈結串列（Linked List）結構來管理文章列表。每個節點代表一篇文章（Page），使用者可以逐篇獲取文章，而不用一次載入整個列表。這種設計優化了查詢效率，能有效應對大量使用者的同時操作，從而增強系統的負載能力。而對於管理者，也提供了豐富的編輯操作，可以方便地進行列表的編輯，無需擔心分頁工程的問題。
+- **鏈結串列（Linked List）結構**：採用鏈結串列結構來管理文章列表，使資料操作更靈活，並為管理員提供完整的編輯功能，無須擔心傳統分頁帶來的額外負擔。
+- **gRPC 通訊**：透過 gRPC 實現高效、低延遲的服務間通訊，確保資料傳輸快速且穩定。
+- **輕量級容器化部署**：利用 Docker 將應用容器化，打包後的 image 僅 90MB，減少資源消耗並加速部署流程。
 
 > 專案想法參考了這篇[文章](https://medium.com/dcardlab/de07f45295f6)
 
-## 介紹
+## 專案元件
 
-- 包含 RESTful API、gRPC API 及 GUI。
+RESTful API： 允許使用者使用 key 擷取文章清單與個別文章資訊。
+gRPC API ： 提供管理員強大的編輯操作，包括建立、刪除、修改清單及其元素。
+GUI ： 編輯文章清單的友善使用者介面，與 gRPC API 相輔相成。
 
-### RESTful API
+## 使用的技術
 
-RESTful API 讓使用者可以透過 key 獲取列表及每一篇文章的資訊：
+Go：主要程式語言。
+PostgreSQL：資料庫，透過 GORM 函式庫進行操作。
+Docker：用於容器化部署。
+Fiber：高效能的網頁框架。
+gRPC：用於服務間高效率、高效能的通訊。
 
-- `GET /head/<listkey>` 可獲得文章列表中第一篇文章的 key
-- `GET /page/<pagekey>` 可獲得文章資訊及下一篇文章的 key
+### Demo
 
-### GRPC API
+服務部署在 [fly.io](https://fly.io/) 上，您可以直接訪問以下連結：
 
-gRPC API 提供管理者對列表進行編輯：
-
-- New: 建立一個新的列表
-- Delete: 刪除一個列表
-- Begin: 獲取第一個元素的 Iterator
-- End: 獲取最後一個元素之後的 Iterator
-- Clear: 清空列表
-- Insert: 於該 Iterator 之前插入新的元素
-- Erase: 移除該 Iterator
-- Set: 設定該 Iterator 儲存的 Page ID
-- PushBack: 列表尾部新增一個元素
-- PopBack: 移除列表尾部的元素
-- PushFront: 列表首部新增一個元素
-- PopFront: 移除列表首部的元素
-- Clone: 複製一個列表
-
-> TODO: 這部分可以使用 gRPC Bidirectional Streaming 進行優化，讓編輯操作的效率更高。
-
-## GUI
-
-可以用來測試 gRPC API，對文章列表進行編輯。
+- RESTful API：
+  - [page-list-service.fly.dev/api/head/\<key\>](https://page-list-service.fly.dev/api/head/*)
+  - [page-list-service.fly.dev/api/page/\<key\>](https://page-list-service.fly.dev/api/page/*)
+- gRPC API：
+  - [page-list-service.fly.dev/grpc](https://page-list-service.fly.dev/grpc)
+- GUI：
+  - [page-list-service.fly.dev](https://page-list-service.fly.dev)
 
 ![grpcui](image/grpcui.png)
 
-## 環境需求
+## 如何使用
+
+環境需求：
 
 - Go 1.20
-
-## 如何使用
 
 ### 1. 初始化 env
 
@@ -65,19 +58,25 @@ docker-compose up -d
 
 ### 3. 服務端口
 
-| service | port |
-| --- | --- |
-| RESTful API | 3000 |
-| gRPC API | 50051 |
-| GUI | 8080 |
+| service     | port  |
+| ----------- | ----- |
+| RESTful API | 3000  |
+| gRPC API    | 50051 |
+| GUI         | 8080  |
+
+## 測試
+
+本專案包含使用 [stretchr/testify](https://pkg.go.dev/github.com/stretchr/testify) 和 [container/list](https://pkg.go.dev/container/list) 進行的全面測試。
 
 ## API 文件
 
 ### RESTful
 
-#### GET `/head/<listkey>`
+RESTful API 讓使用者可以透過 key 獲取文章列表及每一篇文章的資訊
 
-獲得列表的第一個元素的資訊，包含第一個元素的 key。
+#### GET `/api/head/<listkey>`
+
+獲得文章列表中第一篇文章的 key。
 
 Response:
 
@@ -87,9 +86,9 @@ Response:
 }
 ```
 
-#### GET `/page/<pagekey>`
+#### GET `/api/page/<pagekey>`
 
-獲得文章的資訊，包含文章的標題、內容、網址 slug、是否發佈等等。
+獲得文章資訊及下一篇文章的 key。
 
 Response:
 
@@ -106,6 +105,24 @@ Response:
 ```
 
 ### gRPC
+
+gRPC API 提供管理員對列表進行編輯的功能。
+
+- New: 建立一個新的列表
+- Delete: 刪除一個列表
+- Begin: 獲取第一個元素的 Iterator
+- End: 獲取最後一個元素之後的 Iterator
+- Clear: 清空列表
+- Insert: 於該 Iterator 之前插入新的元素
+- Erase: 移除該 Iterator
+- Set: 設定該 Iterator 儲存的 Page ID
+- PushBack: 列表尾部新增一個元素
+- PopBack: 移除列表尾部的元素
+- PushFront: 列表首部新增一個元素
+- PopFront: 移除列表首部的元素
+- Clone: 複製一個列表
+
+> TODO: 這部分可以使用 gRPC Bidirectional Streaming 進行優化，讓編輯操作的效率更高。
 
 #### Message
 
@@ -296,53 +313,3 @@ rpc PopFront(PopRequest) returns (Empty) {}
 ```protobuf
 rpc Clone(CloneRequest) returns (PageList) {}
 ```
-
-## 資料庫
-
-使用 PostgreSQL 作為資料庫，並透過 GORM 套件進行操作。
-
-### 文章列表
-
-```go
-type PageList struct {
-    gorm.Model
-    Key uuid.UUID `gorm:"type:uuid;uniqueIndex"`
-}
-
-type PageNode struct {
-    gorm.Model
-    End     bool
-    Key     uuid.UUID `gorm:"type:uuid;uniqueIndex"`
-    PrevKey uuid.UUID `gorm:"type:uuid"`
-    NextKey uuid.UUID `gorm:"type:uuid"`
-    Page   *page.Page `gorm:"foreignkey:PageID;references:ID"`
-    PageID  uint
-    List    PageList  `gorm:"foreignkey:ListKey;references:Key"`
-    ListKey uuid.UUID `gorm:"type:uuid;index"`
-}
-```
-
-- `PageList`：文章列表，只記錄紀錄了該文章列表的 key。
-- `PageNode`：文章列表節點，紀錄了文章列表中的每一篇文章，包含了上一篇文章的 key、下一篇文章的 key、所屬列表的 key 以及對應的文章 ID。
-
-### 文章
-
-```go
-type Page struct {
-    gorm.Model `json:"-"`
-    Title      string `json:"title" gorm:"not null"`
-    Content    string `json:"content" gorm:"type:text;not null"`
-    Slug       string `json:"slug" gorm:"uniqueIndex;not null"`
-    Published  bool   `json:"-" gorm:"default:false"`
-}
-```
-
-`Page` 紀錄了文章的資訊，包含標題、內容、網址 slug 和發佈狀態。
-
-## 測試
-
-```bash
-go test ./...
-```
-
-使用 `stretchr/testify` 和 `container/list` 套件來實現測試，透過比對 `list` 中的資料和資料庫中的資料是否相同，以確認操作是否正確。同時使用 in-memory sqlite 作為測試資料庫，以確保測試的可靠性。
