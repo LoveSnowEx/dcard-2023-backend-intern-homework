@@ -1,7 +1,8 @@
 :{$PORT} {
 	handle_path /api/* {
-        reverse_proxy localhost:{$FIBER_PORT}
-    }
+		rewrite /api{uri}
+		reverse_proxy localhost:{$FIBER_PORT}
+	}
 	handle_path /grpc/* {
 		reverse_proxy localhost:{$GRPC_PORT}
 	}
